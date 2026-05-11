@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Zap, LayoutGrid, BookOpen, Monitor, Settings, LogOut, DollarSign, Sparkles, User } from "lucide-react";
+import { Zap, LayoutGrid, BookOpen, Monitor, Settings, LogOut, DollarSign, Sparkles, X } from "lucide-react";
 import { useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 
@@ -46,24 +46,56 @@ interface DashboardNavProps {
   userName: string;
   userEmail: string;
   userImage?: string | null;
+  isMobile?: boolean;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export default function DashboardNav({ role, userName, userEmail, userImage }: DashboardNavProps) {
+export default function DashboardNav({
+  role,
+  userName,
+  userEmail,
+  userImage,
+  isMobile = false,
+  isOpen = true,
+  onClose,
+}: DashboardNavProps) {
   const pathname = usePathname();
   const { signOut } = useClerk();
   const router = useRouter();
   const items = navByRole[role] ?? venueNav;
 
+  // Mobile: don't show if closed
+  if (isMobile && !isOpen) return null;
+
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 flex flex-col w-60 bg-zinc-950 border-r border-zinc-900">
-      {/* Logo */}
-      <div className="flex items-center gap-2.5 px-5 py-5 border-b border-zinc-900">
-        <div className="logo-icon w-7 h-7 rounded-sm flex items-center justify-center shrink-0">
-          <Zap className="w-3.5 h-3.5 text-white" fill="white" />
+    <aside
+      className={`${
+        isMobile
+          ? "fixed inset-0 top-0 z-50 w-60 flex flex-col"
+          : "fixed inset-y-0 left-0 z-40 flex flex-col w-60 hidden md:flex"
+      } bg-zinc-950 border-r border-zinc-900`}
+    >
+      {/* Logo + close button */}
+      <div className="flex items-center justify-between px-5 py-5 border-b border-zinc-900">
+        <div className="flex items-center gap-2.5">
+          <div className="logo-icon w-7 h-7 rounded-sm flex items-center justify-center shrink-0">
+            <Zap className="w-3.5 h-3.5 text-white" fill="white" />
+          </div>
+          <span className="font-raleway text-white font-semibold text-sm tracking-wide">
+            Project Lumen
+          </span>
         </div>
-        <span className="font-raleway text-white font-semibold text-sm tracking-wide">
-          Project Lumen
-        </span>
+        {isMobile && (
+          <button
+            type="button"
+            title="Close menu"
+            onClick={onClose}
+            className="p-1 text-zinc-500 hover:text-zinc-300 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       {/* Role badge */}
@@ -77,11 +109,17 @@ export default function DashboardNav({ role, userName, userEmail, userImage }: D
       <nav className="flex-1 px-3 py-2 overflow-y-auto">
         <ul className="flex flex-col gap-0.5">
           {items.map(({ href, label, icon: Icon }) => {
-            const active = pathname === href || (href !== "/dashboard/artist" && href !== "/dashboard/venue" && href !== "/dashboard/admin" && pathname.startsWith(href));
+            const active =
+              pathname === href ||
+              (href !== "/dashboard/artist" &&
+                href !== "/dashboard/venue" &&
+                href !== "/dashboard/admin" &&
+                pathname.startsWith(href));
             return (
               <li key={href}>
                 <Link
                   href={href}
+                  onClick={isMobile ? onClose : undefined}
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-manrope font-medium transition-colors ${
                     active
                       ? "bg-zinc-800 text-white"
@@ -115,6 +153,7 @@ export default function DashboardNav({ role, userName, userEmail, userImage }: D
           </div>
         </div>
         <button
+          type="button"
           onClick={() => signOut(() => router.push("/sign-in"))}
           className="flex items-center gap-2 text-xs font-manrope text-zinc-500 hover:text-zinc-300 transition-colors"
         >

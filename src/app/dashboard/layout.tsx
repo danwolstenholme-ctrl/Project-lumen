@@ -1,7 +1,7 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
-import DashboardNav from "@/components/DashboardNav";
+import { DashboardLayoutClient } from "@/components/DashboardLayoutClient";
 
 type Role = "artist" | "venue" | "admin";
 
@@ -18,16 +18,13 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   const userImage = user?.imageUrl ?? null;
 
   return (
-    <div className="min-h-screen bg-[#09090B] flex">
-      <DashboardNav
-        role={role}
-        userName={userName}
-        userEmail={userEmail}
-        userImage={userImage}
-      />
-      <main className="flex-1 ml-60 min-h-screen overflow-y-auto">
-        {children}
-      </main>
-    </div>
+    <DashboardLayoutClient
+      role={role}
+      userName={userName}
+      userEmail={userEmail}
+      userImage={userImage}
+    >
+      {children}
+    </DashboardLayoutClient>
   );
 }
