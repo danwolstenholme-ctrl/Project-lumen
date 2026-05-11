@@ -3,8 +3,12 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 const isPublicRoute = createRouteMatcher([
+  "/",
   "/sign-in(.*)",
   "/sign-up(.*)",
+  "/artists/(.*)",
+  "/shows/(.*)",
+  "/api/stripe/webhook",
 ]);
 
 export const proxy = clerkMiddleware(async (auth, request: NextRequest) => {

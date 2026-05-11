@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function NotFound() {
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center bg-[#09090B] overflow-hidden">
+    <div className="relative min-h-screen flex flex-col items-center justify-center bg-zinc-50 dark:bg-[#09090B] overflow-hidden">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
@@ -29,18 +29,18 @@ export default function NotFound() {
 
         <div className="flex flex-col gap-2">
           <p
-            className="text-white text-xl tracking-wide"
+            className="text-zinc-900 dark:text-white text-xl tracking-wide"
             style={{ fontFamily: "var(--font-raleway)", fontWeight: 600 }}
           >
             This scene doesn't exist.
           </p>
-          <p className="text-[#52525B] text-sm">
+          <p className="text-zinc-500 dark:text-[#52525B] text-sm">
             The page you're looking for has left the stage.
           </p>
         </div>
 
         <Link
-          href="/sign-in"
+          href="/"
           className="mt-2 px-6 py-3 rounded-lg text-sm font-semibold tracking-wide text-white transition-opacity hover:opacity-80"
           style={{
             fontFamily: "var(--font-raleway)",

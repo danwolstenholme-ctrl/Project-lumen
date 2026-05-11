@@ -14,7 +14,7 @@ export default async function DashboardPage() {
   const role = user?.publicMetadata?.role as Role | undefined;
 
   if (role === "artist") redirect("/dashboard/artist");
-  if (role === "venue") redirect("/dashboard/venue");
+  if (role === "venue") redirect("/dashboard/venue/quickplay");
   if (role === "admin") redirect("/dashboard/admin");
 
   // No role assigned yet — show role selection

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Zap, LayoutGrid, BookOpen, Monitor, Settings, LogOut, DollarSign, Sparkles, X, Sun, Moon } from "lucide-react";
+import { Zap, LayoutGrid, BookOpen, Monitor, Settings, LogOut, DollarSign, Sparkles, X, Sun, Moon, Play, Users } from "lucide-react";
 import { useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/ThemeProvider";
@@ -16,10 +16,10 @@ interface NavItem {
 }
 
 const venueNav: NavItem[] = [
-  { href: "/dashboard/venue", label: "Library", icon: BookOpen },
-  { href: "/dashboard/venue/licenses", label: "My Licenses", icon: LayoutGrid },
-  { href: "/dashboard/venue/tables", label: "Tables", icon: Monitor },
-  { href: "/dashboard/venue/settings", label: "Settings", icon: Settings },
+  { href: "/dashboard/venue/quickplay", label: "Quick Play", icon: Play },
+  { href: "/dashboard/venue", label: "Show Library", icon: BookOpen },
+  { href: "/dashboard/venue/control", label: "Control Panel", icon: Monitor },
+  { href: "/dashboard/venue/tables", label: "Tables", icon: LayoutGrid },
 ];
 
 const artistNav: NavItem[] = [
@@ -32,8 +32,7 @@ const artistNav: NavItem[] = [
 
 const adminNav: NavItem[] = [
   { href: "/dashboard/admin", label: "Overview", icon: LayoutGrid },
-  { href: "/dashboard/admin/users", label: "Users", icon: BookOpen },
-  { href: "/dashboard/admin/shows", label: "Shows", icon: Monitor },
+  { href: "/dashboard/admin/shows", label: "Review Queue", icon: Sparkles },
 ];
 
 const navByRole: Record<Role, NavItem[]> = {

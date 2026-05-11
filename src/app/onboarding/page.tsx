@@ -26,7 +26,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-zinc-950 flex flex-col items-center justify-center overflow-hidden px-6">
+    <div className="relative min-h-screen bg-zinc-50 dark:bg-zinc-950 flex flex-col items-center justify-center overflow-hidden px-6">
 
       <style>{`
         @keyframes blobDrift1 {
@@ -74,7 +74,7 @@ export default function OnboardingPage() {
           <Zap className="w-4 h-4 text-white" fill="white" />
         </div>
         <span
-          className="text-white font-semibold text-base tracking-wide"
+          className="text-zinc-900 dark:text-white font-semibold text-base tracking-wide"
           style={{ fontFamily: "var(--font-raleway)" }}
         >
           Project Lumen
@@ -85,10 +85,10 @@ export default function OnboardingPage() {
       <div className="relative z-10 flex flex-col items-center gap-8 w-full max-w-xl text-center">
 
         {/* Eyebrow */}
-        <div className="inline-flex items-center gap-2 border border-zinc-800 rounded-sm px-2.5 py-1 bg-zinc-900/40 backdrop-blur-sm">
-          <Zap className="w-3 h-3 text-fuchsia-400 shrink-0" />
+        <div className="inline-flex items-center gap-2 border border-zinc-200 dark:border-zinc-800 rounded-sm px-2.5 py-1 bg-white/60 dark:bg-zinc-900/40 backdrop-blur-sm">
+          <Zap className="w-3 h-3 text-fuchsia-500 dark:text-fuchsia-400 shrink-0" />
           <span
-            className="text-[10px] tracking-widest text-zinc-400 font-medium uppercase"
+            className="text-[10px] tracking-widest text-zinc-600 dark:text-zinc-400 font-medium uppercase"
             style={{ fontFamily: "var(--font-manrope)" }}
           >
             One more step
@@ -97,7 +97,7 @@ export default function OnboardingPage() {
 
         <div className="flex flex-col gap-2">
           <h1
-            className="text-white font-semibold leading-none"
+            className="text-zinc-900 dark:text-white font-semibold leading-none"
             style={{
               fontSize: "clamp(1.75rem, 4vw, 2.75rem)",
               letterSpacing: "-0.01em",
@@ -108,7 +108,7 @@ export default function OnboardingPage() {
             <span className="text-gradient">Lumen?</span>
           </h1>
           <p
-            className="text-zinc-400 text-sm"
+            className="text-zinc-600 dark:text-zinc-400 text-sm"
             style={{ fontFamily: "var(--font-manrope)" }}
           >
             This sets up your dashboard. You can't change this later.
@@ -120,26 +120,26 @@ export default function OnboardingPage() {
           <button
             onClick={() => selectRole("artist")}
             disabled={loading !== null}
-            className="group relative flex flex-col gap-4 p-7 rounded-xl border border-zinc-800 bg-zinc-900/50 hover:border-fuchsia-500/50 hover:bg-zinc-900 transition-all text-left disabled:opacity-50"
+            className="group relative flex flex-col gap-4 p-7 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:border-fuchsia-500/50 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-all text-left disabled:opacity-50"
           >
             <div
               className="w-10 h-10 rounded-lg flex items-center justify-center"
               style={{ background: "linear-gradient(135deg, rgba(217,70,239,0.2), rgba(217,70,239,0.05))", border: "1px solid rgba(217,70,239,0.2)" }}
             >
-              <Palette className="w-5 h-5 text-fuchsia-400" />
+              <Palette className="w-5 h-5 text-fuchsia-500 dark:text-fuchsia-400" />
             </div>
             <div className="flex flex-col gap-1">
               <p
-                className="text-white font-semibold tracking-wide text-base"
+                className="text-zinc-900 dark:text-white font-semibold tracking-wide text-base"
                 style={{ fontFamily: "var(--font-raleway)" }}
               >
                 Artist
               </p>
-              <p className="text-zinc-400 text-sm leading-relaxed" style={{ fontFamily: "var(--font-manrope)" }}>
+              <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed" style={{ fontFamily: "var(--font-manrope)" }}>
                 Upload immersive shows and license your work to venues worldwide.
               </p>
             </div>
-            <div className="flex items-center gap-1.5 text-xs text-fuchsia-400 opacity-0 group-hover:opacity-100 transition-opacity" style={{ fontFamily: "var(--font-manrope)" }}>
+            <div className="flex items-center gap-1.5 text-xs text-fuchsia-500 dark:text-fuchsia-400 opacity-0 group-hover:opacity-100 transition-opacity" style={{ fontFamily: "var(--font-manrope)" }}>
               {loading === "artist" ? "Setting up…" : <>Select Artist <ArrowRight className="w-3 h-3" /></>}
             </div>
           </button>
@@ -147,26 +147,26 @@ export default function OnboardingPage() {
           <button
             onClick={() => selectRole("venue")}
             disabled={loading !== null}
-            className="group relative flex flex-col gap-4 p-7 rounded-xl border border-zinc-800 bg-zinc-900/50 hover:border-purple-500/50 hover:bg-zinc-900 transition-all text-left disabled:opacity-50"
+            className="group relative flex flex-col gap-4 p-7 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:border-purple-500/50 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-all text-left disabled:opacity-50"
           >
             <div
               className="w-10 h-10 rounded-lg flex items-center justify-center"
               style={{ background: "linear-gradient(135deg, rgba(168,85,247,0.2), rgba(168,85,247,0.05))", border: "1px solid rgba(168,85,247,0.2)" }}
             >
-              <Building2 className="w-5 h-5 text-purple-400" />
+              <Building2 className="w-5 h-5 text-purple-500 dark:text-purple-400" />
             </div>
             <div className="flex flex-col gap-1">
               <p
-                className="text-white font-semibold tracking-wide text-base"
+                className="text-zinc-900 dark:text-white font-semibold tracking-wide text-base"
                 style={{ fontFamily: "var(--font-raleway)" }}
               >
                 Venue
               </p>
-              <p className="text-zinc-400 text-sm leading-relaxed" style={{ fontFamily: "var(--font-manrope)" }}>
+              <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed" style={{ fontFamily: "var(--font-manrope)" }}>
                 Browse and license shows to transform your dining experience.
               </p>
             </div>
-            <div className="flex items-center gap-1.5 text-xs text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity" style={{ fontFamily: "var(--font-manrope)" }}>
+            <div className="flex items-center gap-1.5 text-xs text-purple-500 dark:text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity" style={{ fontFamily: "var(--font-manrope)" }}>
               {loading === "venue" ? "Setting up…" : <>Select Venue <ArrowRight className="w-3 h-3" /></>}
             </div>
           </button>
