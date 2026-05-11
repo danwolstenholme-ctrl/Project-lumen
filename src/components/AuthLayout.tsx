@@ -118,7 +118,7 @@ export default function AuthLayout({ children, headline, sub }: AuthLayoutProps)
       </div>
 
       {/* ── Right panel — form ── */}
-      <div className="relative flex flex-col items-center justify-center w-full lg:w-1/2 px-6 py-12 overflow-y-auto bg-zinc-900">
+      <div className="relative flex flex-col items-center justify-center w-full lg:w-1/2 px-6 py-12 overflow-y-auto bg-white">
 
         {/* Mobile-only logo */}
         <Link href="https://projectlumen.io" className="lg:hidden inline-flex items-center gap-2.5 mb-10">
