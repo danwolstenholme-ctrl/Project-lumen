@@ -27,14 +27,13 @@ export default function Step2Media({ uploads, onFileSelect, onClear, onNext, onB
   return (
     <div className="flex flex-col gap-7">
       {/* 60fps notice */}
-      <div className="flex items-start gap-3 p-4 rounded-xl border border-zinc-800 bg-zinc-900/40">
-        <Info className="w-4 h-4 text-zinc-500 shrink-0 mt-0.5" />
-        <p className="font-manrope text-xs text-zinc-400 leading-relaxed">
-          <span className="text-zinc-300 font-medium">Frame rate cannot be verified automatically.</span> Please confirm your export is set to exactly 60fps before uploading. Shows encoded at lower frame rates will be rejected during review.
+      <div className="flex items-start gap-3 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40">
+        <Info className="w-4 h-4 text-zinc-400 dark:text-zinc-500 shrink-0 mt-0.5" />
+        <p className="font-manrope text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+          <span className="text-zinc-800 dark:text-zinc-300 font-medium">Frame rate cannot be verified automatically.</span> Please confirm your export is set to exactly 60fps before uploading. Shows encoded at lower frame rates will be rejected during review.
         </p>
       </div>
 
-      {/* Thumbnail */}
       <FileDropZone
         fileKey="thumbnail"
         label="Thumbnail Image *"
@@ -47,7 +46,6 @@ export default function Step2Media({ uploads, onFileSelect, onClear, onNext, onB
         previewType="image"
       />
 
-      {/* Preview clip */}
       <FileDropZone
         fileKey="preview"
         label="Preview Clip"
@@ -60,7 +58,6 @@ export default function Step2Media({ uploads, onFileSelect, onClear, onNext, onB
         previewType="video"
       />
 
-      {/* Full show video */}
       <div className="flex flex-col gap-1">
         <FileDropZone
           fileKey="video"
@@ -71,12 +68,11 @@ export default function Step2Media({ uploads, onFileSelect, onClear, onNext, onB
           onFileSelect={onFileSelect}
           onClear={onClear}
         />
-        <p className="font-manrope text-[11px] text-zinc-600 px-1">
+        <p className="font-manrope text-[11px] text-zinc-400 dark:text-zinc-600 px-1">
           Resolution is validated automatically. Your video must be exactly 3840×2160px.
         </p>
       </div>
 
-      {/* Audio */}
       <FileDropZone
         fileKey="audio"
         label="Audio File"
@@ -92,7 +88,7 @@ export default function Step2Media({ uploads, onFileSelect, onClear, onNext, onB
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-300 font-manrope font-medium text-sm hover:border-zinc-700 hover:text-white transition-all"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 font-manrope font-medium text-sm hover:border-zinc-300 dark:hover:border-zinc-700 hover:text-zinc-900 dark:hover:text-white transition-all"
         >
           <ArrowLeft className="w-4 h-4" />
           Back

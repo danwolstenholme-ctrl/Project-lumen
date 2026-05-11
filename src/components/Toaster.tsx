@@ -36,19 +36,19 @@ export default function Toaster() {
           key={t.id}
           className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-manrope shadow-xl pointer-events-auto ${
             t.type === "success"
-              ? "bg-zinc-900 border-emerald-500/30 text-white"
-              : "bg-zinc-900 border-red-500/30 text-white"
+              ? "bg-white dark:bg-zinc-900 border-emerald-500/30 text-zinc-900 dark:text-white"
+              : "bg-white dark:bg-zinc-900 border-red-500/30 text-zinc-900 dark:text-white"
           }`}
         >
           {t.type === "success" ? (
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0" />
           ) : (
-            <XCircle className="w-4 h-4 text-red-400 shrink-0" />
+            <XCircle className="w-4 h-4 text-red-500 dark:text-red-400 shrink-0" />
           )}
           <span>{t.message}</span>
           <button
             onClick={() => setToasts((prev) => prev.filter((x) => x.id !== t.id))}
-            className="ml-2 text-zinc-500 hover:text-zinc-300 transition-colors"
+            className="ml-2 text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
           >
             <X className="w-3.5 h-3.5" />
           </button>

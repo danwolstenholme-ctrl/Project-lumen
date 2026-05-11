@@ -49,7 +49,7 @@ export default function Step1Details({ details, onChange, onNext }: Step1Details
     <div className="flex flex-col gap-7">
       {/* Title */}
       <div className="flex flex-col gap-2">
-        <label className="font-manrope text-sm font-medium text-zinc-300">
+        <label className="font-manrope text-sm font-medium text-zinc-700 dark:text-zinc-300">
           Show Title <span className="text-red-400">*</span>
         </label>
         <input
@@ -58,15 +58,15 @@ export default function Step1Details({ details, onChange, onNext }: Step1Details
           onChange={(e) => onChange({ title: e.target.value })}
           placeholder="e.g. Abyssal Tide"
           maxLength={100}
-          className="w-full px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white font-manrope text-sm placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors"
+          className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white font-manrope text-sm placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors"
         />
       </div>
 
       {/* Description */}
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <label className="font-manrope text-sm font-medium text-zinc-300">Description</label>
-          <span className={`font-manrope text-xs tabular-nums ${details.description.length > MAX_DESC * 0.9 ? "text-amber-400" : "text-zinc-600"}`}>
+          <label className="font-manrope text-sm font-medium text-zinc-700 dark:text-zinc-300">Description</label>
+          <span className={`font-manrope text-xs tabular-nums ${details.description.length > MAX_DESC * 0.9 ? "text-amber-500 dark:text-amber-400" : "text-zinc-400 dark:text-zinc-600"}`}>
             {details.description.length}/{MAX_DESC}
           </span>
         </div>
@@ -75,13 +75,13 @@ export default function Step1Details({ details, onChange, onNext }: Step1Details
           onChange={(e) => onChange({ description: e.target.value.slice(0, MAX_DESC) })}
           placeholder="Describe the atmosphere, mood, and visual journey of your show…"
           rows={4}
-          className="w-full px-4 py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white font-manrope text-sm placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600 transition-colors resize-none leading-relaxed"
+          className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white font-manrope text-sm placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors resize-none leading-relaxed"
         />
       </div>
 
       {/* Category */}
       <div className="flex flex-col gap-2">
-        <label className="font-manrope text-sm font-medium text-zinc-300">
+        <label className="font-manrope text-sm font-medium text-zinc-700 dark:text-zinc-300">
           Category <span className="text-red-400">*</span>
         </label>
         <div className="flex flex-wrap gap-2">
@@ -92,8 +92,8 @@ export default function Step1Details({ details, onChange, onNext }: Step1Details
               onClick={() => onChange({ category: cat })}
               className={`px-3.5 py-1.5 rounded-lg border text-sm font-manrope font-medium transition-all ${
                 details.category === cat
-                  ? "bg-fuchsia-600/20 border-fuchsia-500/50 text-fuchsia-300"
-                  : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-300"
+                  ? "bg-fuchsia-600/20 border-fuchsia-500/50 text-fuchsia-500 dark:text-fuchsia-300"
+                  : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700 hover:text-zinc-900 dark:hover:text-zinc-300"
               }`}
             >
               {cat}
@@ -104,17 +104,17 @@ export default function Step1Details({ details, onChange, onNext }: Step1Details
 
       {/* Tags */}
       <div className="flex flex-col gap-2">
-        <label className="font-manrope text-sm font-medium text-zinc-300">
+        <label className="font-manrope text-sm font-medium text-zinc-700 dark:text-zinc-300">
           Tags <span className="font-normal text-zinc-500 text-xs">(optional · up to 10)</span>
         </label>
-        <div className="flex flex-wrap gap-2 p-3 rounded-xl bg-zinc-900 border border-zinc-800 focus-within:border-zinc-600 transition-colors min-h-[48px]">
+        <div className="flex flex-wrap gap-2 p-3 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 focus-within:border-zinc-400 dark:focus-within:border-zinc-600 transition-colors min-h-[48px]">
           {details.tags.map((tag) => (
             <span
               key={tag}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-800 border border-zinc-700 text-xs font-manrope text-zinc-300"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-manrope text-zinc-700 dark:text-zinc-300"
             >
               {tag}
-              <button type="button" onClick={() => onChange({ tags: details.tags.filter((t) => t !== tag) })} className="text-zinc-500 hover:text-zinc-300">
+              <button type="button" onClick={() => onChange({ tags: details.tags.filter((t) => t !== tag) })} className="text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300">
                 <X className="w-3 h-3" />
               </button>
             </span>
@@ -127,7 +127,7 @@ export default function Step1Details({ details, onChange, onNext }: Step1Details
               onKeyDown={onTagKeyDown}
               onBlur={addTag}
               placeholder={details.tags.length === 0 ? "Type a tag and press Enter…" : ""}
-              className="flex-1 min-w-[120px] bg-transparent text-sm font-manrope text-white placeholder:text-zinc-600 focus:outline-none"
+              className="flex-1 min-w-[120px] bg-transparent text-sm font-manrope text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none"
             />
           )}
         </div>

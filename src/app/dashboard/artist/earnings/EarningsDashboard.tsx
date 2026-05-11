@@ -115,13 +115,13 @@ export default function EarningsDashboard({
     <div className="px-8 py-8 max-w-7xl mx-auto w-full">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="font-raleway text-2xl font-semibold text-white tracking-tight">Earnings</h1>
-          <p className="font-manrope text-sm text-zinc-400 mt-1">Your royalty history and payout settings</p>
+          <h1 className="font-raleway text-2xl font-semibold text-zinc-900 dark:text-white tracking-tight">Earnings</h1>
+          <p className="font-manrope text-sm text-zinc-600 dark:text-zinc-400 mt-1">Your royalty history and payout settings</p>
         </div>
         <button
           type="button"
           onClick={exportCsv}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-sm font-manrope font-medium text-zinc-300 hover:border-zinc-700 hover:text-white transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-sm font-manrope font-medium text-zinc-600 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700 hover:text-zinc-900 dark:hover:text-white transition-colors"
         >
           <Download className="w-4 h-4" />
           Export CSV
@@ -131,17 +131,17 @@ export default function EarningsDashboard({
       {/* Summary cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
-          { label: "Total Earned", value: fmt(totalEarned), icon: DollarSign, color: "text-emerald-400" },
-          { label: "Pending Payout", value: fmt(pendingPayout), icon: Clock, color: "text-amber-400" },
-          { label: "Last Payout", value: lastPaidAmount ? fmt(lastPaidAmount) : "—", sub: lastPaidDate ? fmtDate(lastPaidDate) : undefined, icon: Check, color: "text-purple-400" },
-          { label: "Next Payout", value: nextPayoutDate(), icon: Calendar, color: "text-fuchsia-400" },
+          { label: "Total Earned",   value: fmt(totalEarned),                                  icon: DollarSign, color: "text-emerald-400" },
+          { label: "Pending Payout", value: fmt(pendingPayout),                                icon: Clock,      color: "text-amber-400" },
+          { label: "Last Payout",    value: lastPaidAmount ? fmt(lastPaidAmount) : "—", sub: lastPaidDate ? fmtDate(lastPaidDate) : undefined, icon: Check, color: "text-purple-400" },
+          { label: "Next Payout",    value: nextPayoutDate(),                                  icon: Calendar,   color: "text-fuchsia-400" },
         ].map(({ label, value, sub, icon: Icon, color }) => (
-          <div key={label} className="flex items-center gap-4 p-5 rounded-xl border border-zinc-800 bg-zinc-900/60">
-            <div className="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center shrink-0">
+          <div key={label} className="flex items-center gap-4 p-5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60">
+            <div className="w-10 h-10 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0">
               <Icon className={`w-5 h-5 ${color}`} />
             </div>
             <div className="min-w-0">
-              <p className="font-raleway text-lg font-semibold text-white truncate">{value}</p>
+              <p className="font-raleway text-lg font-semibold text-zinc-900 dark:text-white truncate">{value}</p>
               {sub && <p className="font-manrope text-[10px] text-zinc-500">{sub}</p>}
               <p className="font-manrope text-xs text-zinc-500 mt-0.5">{label}</p>
             </div>
@@ -150,8 +150,8 @@ export default function EarningsDashboard({
       </div>
 
       {/* Monthly chart */}
-      <div className="p-6 rounded-xl border border-zinc-800 bg-zinc-900/40 mb-8">
-        <h2 className="font-raleway text-base font-semibold text-white mb-5">Monthly Earnings</h2>
+      <div className="p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 mb-8">
+        <h2 className="font-raleway text-base font-semibold text-zinc-900 dark:text-white mb-5">Monthly Earnings</h2>
         <ResponsiveContainer width="100%" height={180}>
           <BarChart data={monthlyData} barSize={24} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
             <XAxis
@@ -161,13 +161,13 @@ export default function EarningsDashboard({
               tickLine={false}
             />
             <YAxis
-              tick={{ fill: "#52525b", fontSize: 11, fontFamily: "var(--font-manrope)" }}
+              tick={{ fill: "#71717a", fontSize: 11, fontFamily: "var(--font-manrope)" }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(v) => `€${v}`}
             />
             <Tooltip
-              cursor={{ fill: "rgba(255,255,255,0.03)" }}
+              cursor={{ fill: "rgba(0,0,0,0.04)" }}
               contentStyle={{ background: "#18181b", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontFamily: "var(--font-manrope)", fontSize: 12 }}
               labelStyle={{ color: "#a1a1aa" }}
               formatter={(v) => [fmt(Number(v ?? 0)), "Earned"]}
@@ -182,26 +182,26 @@ export default function EarningsDashboard({
       </div>
 
       {/* Earnings table */}
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 mb-8 overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
-          <h2 className="font-raleway text-base font-semibold text-white">Transaction History</h2>
+      <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 mb-8 overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
+          <h2 className="font-raleway text-base font-semibold text-zinc-900 dark:text-white">Transaction History</h2>
           <span className="font-manrope text-xs text-zinc-500">{rows.length} transactions</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-zinc-800">
+              <tr className="border-b border-zinc-200 dark:border-zinc-800">
                 {[
-                  { key: "date", label: "Date" },
-                  { key: null, label: "Venue" },
-                  { key: null, label: "Show" },
-                  { key: null, label: "License Fee" },
+                  { key: "date",   label: "Date" },
+                  { key: null,     label: "Venue" },
+                  { key: null,     label: "Show" },
+                  { key: null,     label: "License Fee" },
                   { key: "amount", label: "Your Share (70%)" },
-                  { key: null, label: "Status" },
+                  { key: null,     label: "Status" },
                 ].map(({ key, label }) => (
                   <th
                     key={label}
-                    className={`px-5 py-3 text-left font-manrope text-[11px] uppercase tracking-widest text-zinc-500 font-medium ${key ? "cursor-pointer hover:text-zinc-300 select-none transition-colors" : ""}`}
+                    className={`px-5 py-3 text-left font-manrope text-[11px] uppercase tracking-widest text-zinc-500 font-medium ${key ? "cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-300 select-none transition-colors" : ""}`}
                     onClick={key ? () => toggleSort(key as "date" | "amount") : undefined}
                   >
                     {label}{key && sortKey === key && (sortAsc ? " ↑" : " ↓")}
@@ -212,22 +212,22 @@ export default function EarningsDashboard({
             <tbody>
               {pageRows.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-5 py-12 text-center font-manrope text-sm text-zinc-600">
+                  <td colSpan={6} className="px-5 py-12 text-center font-manrope text-sm text-zinc-500">
                     No earnings yet. Earnings appear when venues license your shows.
                   </td>
                 </tr>
               ) : pageRows.map((r) => (
-                <tr key={r.id} className="border-b border-zinc-800/50 hover:bg-white/[0.02] transition-colors">
-                  <td className="px-5 py-3.5 font-manrope text-sm text-zinc-400 whitespace-nowrap">{fmtDate(r.date)}</td>
-                  <td className="px-5 py-3.5 font-manrope text-sm text-zinc-300">{r.venueName}</td>
-                  <td className="px-5 py-3.5 font-manrope text-sm text-zinc-300 max-w-[200px] truncate">{r.showTitle}</td>
-                  <td className="px-5 py-3.5 font-manrope text-sm text-zinc-400">{fmt(r.licenseFee)}</td>
-                  <td className="px-5 py-3.5 font-manrope text-sm text-emerald-400 font-semibold">{fmt(r.artistShare)}</td>
+                <tr key={r.id} className="border-b border-zinc-100 dark:border-zinc-800/50 hover:bg-zinc-50 dark:hover:bg-white/[0.02] transition-colors">
+                  <td className="px-5 py-3.5 font-manrope text-sm text-zinc-600 dark:text-zinc-400 whitespace-nowrap">{fmtDate(r.date)}</td>
+                  <td className="px-5 py-3.5 font-manrope text-sm text-zinc-700 dark:text-zinc-300">{r.venueName}</td>
+                  <td className="px-5 py-3.5 font-manrope text-sm text-zinc-700 dark:text-zinc-300 max-w-[200px] truncate">{r.showTitle}</td>
+                  <td className="px-5 py-3.5 font-manrope text-sm text-zinc-600 dark:text-zinc-400">{fmt(r.licenseFee)}</td>
+                  <td className="px-5 py-3.5 font-manrope text-sm text-emerald-500 dark:text-emerald-400 font-semibold">{fmt(r.artistShare)}</td>
                   <td className="px-5 py-3.5">
                     <span className={`inline-flex items-center gap-1 text-[11px] font-manrope font-medium px-2 py-0.5 rounded border ${
                       r.status === "paid"
-                        ? "text-emerald-400 bg-emerald-400/10 border-emerald-400/20"
-                        : "text-amber-400 bg-amber-400/10 border-amber-400/20"
+                        ? "text-emerald-500 bg-emerald-500/10 border-emerald-500/20"
+                        : "text-amber-500 bg-amber-500/10 border-amber-500/20"
                     }`}>
                       {r.status === "paid" ? <Check className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
                       {r.status === "paid" ? "Paid" : "Pending"}
@@ -239,17 +239,17 @@ export default function EarningsDashboard({
           </table>
         </div>
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-5 py-3 border-t border-zinc-800">
+          <div className="flex items-center justify-between px-5 py-3 border-t border-zinc-200 dark:border-zinc-800">
             <span className="font-manrope text-xs text-zinc-500">
               Page {page + 1} of {totalPages}
             </span>
             <div className="flex items-center gap-1">
               <button type="button" title="Previous page" onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0}
-                className="p-1.5 rounded text-zinc-500 hover:text-zinc-300 disabled:opacity-30 transition-colors">
+                className="p-1.5 rounded text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 disabled:opacity-30 transition-colors">
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button type="button" title="Next page" onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1}
-                className="p-1.5 rounded text-zinc-500 hover:text-zinc-300 disabled:opacity-30 transition-colors">
+                className="p-1.5 rounded text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 disabled:opacity-30 transition-colors">
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -258,16 +258,16 @@ export default function EarningsDashboard({
       </div>
 
       {/* Payout settings */}
-      <div className="p-6 rounded-xl border border-zinc-800 bg-zinc-900/40">
+      <div className="p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40">
         <div className="flex items-start justify-between mb-5">
           <div>
-            <h2 className="font-raleway text-base font-semibold text-white">Payout Settings</h2>
+            <h2 className="font-raleway text-base font-semibold text-zinc-900 dark:text-white">Payout Settings</h2>
             <p className="font-manrope text-xs text-zinc-500 mt-0.5">
-              Minimum payout threshold: <span className="text-zinc-300">€50</span>. Paid monthly on the 1st.
+              Minimum payout threshold: <span className="text-zinc-700 dark:text-zinc-300">€50</span>. Paid monthly on the 1st.
             </p>
           </div>
           {pendingPayout < 50 && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs font-manrope text-amber-400">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs font-manrope text-amber-500 dark:text-amber-400">
               <AlertCircle className="w-3.5 h-3.5" />
               {fmt(50 - pendingPayout)} until next payout
             </div>
@@ -281,7 +281,7 @@ export default function EarningsDashboard({
               title="Payout method"
               value={payoutMethod}
               onChange={(e) => setPayoutMethod(e.target.value)}
-              className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm font-manrope text-white focus:outline-none focus:border-fuchsia-500 transition-colors"
+              className="bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm font-manrope text-zinc-900 dark:text-white focus:outline-none focus:border-fuchsia-500 transition-colors"
             >
               <option value="">Select method</option>
               <option value="paypal">PayPal</option>
@@ -296,7 +296,7 @@ export default function EarningsDashboard({
                 value={payoutEmail}
                 onChange={(e) => setPayoutEmail(e.target.value)}
                 placeholder="your@paypal.com"
-                className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm font-manrope text-white placeholder:text-zinc-500 focus:outline-none focus:border-fuchsia-500 transition-colors"
+                className="bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm font-manrope text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-fuchsia-500 transition-colors"
               />
             </div>
           )}
@@ -308,7 +308,7 @@ export default function EarningsDashboard({
                 value={payoutIban}
                 onChange={(e) => setPayoutIban(e.target.value)}
                 placeholder="IE12 BOFI 9000 0112 3456 78"
-                className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm font-manrope text-white placeholder:text-zinc-500 focus:outline-none focus:border-fuchsia-500 transition-colors"
+                className="bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm font-manrope text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-fuchsia-500 transition-colors"
               />
             </div>
           )}

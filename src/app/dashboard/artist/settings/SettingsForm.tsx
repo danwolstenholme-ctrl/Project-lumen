@@ -76,20 +76,20 @@ export default function SettingsForm({
 
   return (
     <div className="px-8 py-8 max-w-2xl mx-auto w-full">
-      <h1 className="font-raleway text-2xl font-semibold text-white mb-8">Profile Settings</h1>
+      <h1 className="font-raleway text-2xl font-semibold text-zinc-900 dark:text-white mb-8">Profile Settings</h1>
 
       {/* Avatar */}
-      <section className="mb-8 pb-8 border-b border-zinc-800">
-        <h2 className="font-raleway text-sm font-semibold text-zinc-300 uppercase tracking-widest mb-4 flex items-center gap-2">
+      <section className="mb-8 pb-8 border-b border-zinc-200 dark:border-zinc-800">
+        <h2 className="font-raleway text-sm font-semibold text-zinc-600 dark:text-zinc-300 uppercase tracking-widest mb-4 flex items-center gap-2">
           <User className="w-4 h-4" /> Profile
         </h2>
         <div className="flex items-center gap-5">
           <div className="relative shrink-0">
             {avatarUrl ? (
-              <img src={avatarUrl} alt="Avatar" className="w-16 h-16 rounded-full object-cover ring-2 ring-zinc-700" />
+              <img src={avatarUrl} alt="Avatar" className="w-16 h-16 rounded-full object-cover ring-2 ring-zinc-200 dark:ring-zinc-700" />
             ) : (
-              <div className="w-16 h-16 rounded-full bg-zinc-800 ring-2 ring-zinc-700 flex items-center justify-center">
-                <span className="font-raleway text-xl font-bold text-zinc-300">{name.charAt(0).toUpperCase()}</span>
+              <div className="w-16 h-16 rounded-full bg-zinc-100 dark:bg-zinc-800 ring-2 ring-zinc-200 dark:ring-zinc-700 flex items-center justify-center">
+                <span className="font-raleway text-xl font-bold text-zinc-500 dark:text-zinc-300">{name.charAt(0).toUpperCase()}</span>
               </div>
             )}
             {avatarUploading && (
@@ -103,7 +103,7 @@ export default function SettingsForm({
               type="button"
               onClick={() => fileRef.current?.click()}
               disabled={avatarUploading}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-sm font-manrope text-zinc-300 hover:border-zinc-600 hover:text-white transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-sm font-manrope text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-600 hover:text-zinc-900 dark:hover:text-white transition-colors disabled:opacity-50"
             >
               <Upload className="w-4 h-4" /> Upload photo
             </button>
@@ -128,12 +128,12 @@ export default function SettingsForm({
       </section>
 
       {/* Slug */}
-      <section className="mb-8 pb-8 border-b border-zinc-800">
-        <h2 className="font-raleway text-sm font-semibold text-zinc-300 uppercase tracking-widest mb-4 flex items-center gap-2">
+      <section className="mb-8 pb-8 border-b border-zinc-200 dark:border-zinc-800">
+        <h2 className="font-raleway text-sm font-semibold text-zinc-600 dark:text-zinc-300 uppercase tracking-widest mb-4 flex items-center gap-2">
           <LinkIcon className="w-4 h-4" /> Public Profile URL
         </h2>
-        <div className="flex items-center gap-0 rounded-lg overflow-hidden border border-zinc-700 focus-within:border-fuchsia-500 transition-colors">
-          <span className="px-3 py-2.5 bg-zinc-800 text-sm font-manrope text-zinc-500 shrink-0 border-r border-zinc-700">
+        <div className="flex items-center gap-0 rounded-lg overflow-hidden border border-zinc-300 dark:border-zinc-700 focus-within:border-fuchsia-500 transition-colors">
+          <span className="px-3 py-2.5 bg-zinc-100 dark:bg-zinc-800 text-sm font-manrope text-zinc-500 shrink-0 border-r border-zinc-300 dark:border-zinc-700">
             projectlumen.io/artists/
           </span>
           <input
@@ -141,16 +141,16 @@ export default function SettingsForm({
             value={slug}
             onChange={(e) => setSlug(slugify(e.target.value))}
             placeholder="your-name"
-            className="flex-1 px-3 py-2.5 bg-zinc-900 text-sm font-manrope text-white placeholder:text-zinc-500 focus:outline-none"
+            className="flex-1 px-3 py-2.5 bg-white dark:bg-zinc-900 text-sm font-manrope text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none"
           />
         </div>
-        {slugError && <p className="font-manrope text-xs text-red-400 mt-1.5">{slugError}</p>}
+        {slugError && <p className="font-manrope text-xs text-red-500 dark:text-red-400 mt-1.5">{slugError}</p>}
         <p className="font-manrope text-xs text-zinc-500 mt-1.5">Lowercase letters, numbers, and hyphens only.</p>
       </section>
 
       {/* Notifications */}
-      <section className="mb-8 pb-8 border-b border-zinc-800">
-        <h2 className="font-raleway text-sm font-semibold text-zinc-300 uppercase tracking-widest mb-4 flex items-center gap-2">
+      <section className="mb-8 pb-8 border-b border-zinc-200 dark:border-zinc-800">
+        <h2 className="font-raleway text-sm font-semibold text-zinc-600 dark:text-zinc-300 uppercase tracking-widest mb-4 flex items-center gap-2">
           <Bell className="w-4 h-4" /> Notifications
         </h2>
         <label className="flex items-start gap-3 cursor-pointer">
@@ -159,29 +159,29 @@ export default function SettingsForm({
             title={notifyOnLicense ? "Disable license notifications" : "Enable license notifications"}
             onClick={() => setNotifyOnLicense((p) => !p)}
             className={`mt-0.5 w-5 h-5 rounded border flex items-center justify-center shrink-0 transition-colors ${
-              notifyOnLicense ? "bg-fuchsia-600 border-fuchsia-600" : "bg-zinc-800 border-zinc-700"
+              notifyOnLicense ? "bg-fuchsia-600 border-fuchsia-600" : "bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700"
             }`}
           >
             {notifyOnLicense && <Check className="w-3 h-3 text-white" />}
           </button>
           <div>
-            <p className="font-manrope text-sm text-white">Email me when a venue licenses my show</p>
+            <p className="font-manrope text-sm text-zinc-900 dark:text-white">Email me when a venue licenses my show</p>
             <p className="font-manrope text-xs text-zinc-500 mt-0.5">Sent to your account email address</p>
           </div>
         </label>
       </section>
 
       {/* Payout */}
-      <section className="mb-8 pb-8 border-b border-zinc-800">
-        <h2 className="font-raleway text-sm font-semibold text-zinc-300 uppercase tracking-widest mb-2 flex items-center gap-2">
+      <section className="mb-8 pb-8 border-b border-zinc-200 dark:border-zinc-800">
+        <h2 className="font-raleway text-sm font-semibold text-zinc-600 dark:text-zinc-300 uppercase tracking-widest mb-2 flex items-center gap-2">
           <DollarSign className="w-4 h-4" /> Payout Settings
         </h2>
-        <p className="font-manrope text-sm text-zinc-400 mb-3">
+        <p className="font-manrope text-sm text-zinc-600 dark:text-zinc-400 mb-3">
           Manage your bank account or PayPal for royalty payouts.
         </p>
         <Link
           href="/dashboard/artist/earnings"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-sm font-manrope text-zinc-300 hover:border-zinc-700 hover:text-white transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-sm font-manrope text-zinc-600 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700 hover:text-zinc-900 dark:hover:text-white transition-colors"
         >
           Manage payout settings →
         </Link>
@@ -206,7 +206,7 @@ function Field({
   label: string; value: string; onChange: (v: string) => void;
   maxLength?: number; multiline?: boolean; hint?: string; type?: string;
 }) {
-  const cls = "w-full px-3 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm font-manrope text-white placeholder:text-zinc-500 focus:outline-none focus:border-fuchsia-500 transition-colors";
+  const cls = "w-full px-3 py-2.5 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm font-manrope text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-fuchsia-500 transition-colors";
   return (
     <div className="flex flex-col gap-1.5">
       <label className="font-manrope text-xs text-zinc-500 uppercase tracking-widest">{label}</label>
@@ -215,7 +215,7 @@ function Field({
       ) : (
         <input type={type ?? "text"} value={value} onChange={(e) => onChange(e.target.value)} maxLength={maxLength} className={cls} />
       )}
-      {hint && <p className="font-manrope text-xs text-zinc-600">{hint}</p>}
+      {hint && <p className="font-manrope text-xs text-zinc-500">{hint}</p>}
     </div>
   );
 }

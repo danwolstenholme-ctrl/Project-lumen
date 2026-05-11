@@ -59,12 +59,12 @@ export default function FileDropZone({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <label className="font-manrope text-sm font-medium text-zinc-300">{label}</label>
+        <label className="font-manrope text-sm font-medium text-zinc-700 dark:text-zinc-300">{label}</label>
         {isDone && (
           <button
             type="button"
             onClick={() => onClear(fileKey)}
-            className="flex items-center gap-1 text-xs font-manrope text-zinc-500 hover:text-zinc-300 transition-colors"
+            className="flex items-center gap-1 text-xs font-manrope text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors"
           >
             <X className="w-3 h-3" /> Replace
           </button>
@@ -80,8 +80,8 @@ export default function FileDropZone({
             : hasError
             ? "border-red-500/40 bg-red-500/5"
             : isActive
-            ? "border-zinc-700 bg-zinc-900/80"
-            : "border-zinc-800 bg-zinc-900/40 hover:border-zinc-700 hover:bg-zinc-900/60"
+            ? "border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900/80"
+            : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-900/60"
         } ${!isActive && !isDone ? "cursor-pointer" : ""}`}
         onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
         onDragLeave={() => setDragging(false)}
@@ -99,18 +99,18 @@ export default function FileDropZone({
         {/* Empty state */}
         {!isActive && !isDone && (
           <div className="flex items-center gap-4 px-5 py-4">
-            <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center shrink-0">
-              {fileKey === "thumbnail" ? <ImageIcon className="w-5 h-5 text-zinc-400" /> :
-               fileKey === "audio" ? <FileAudio className="w-5 h-5 text-zinc-400" /> :
-               <FileVideo className="w-5 h-5 text-zinc-400" />}
+            <div className="w-10 h-10 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center shrink-0">
+              {fileKey === "thumbnail" ? <ImageIcon className="w-5 h-5 text-zinc-500 dark:text-zinc-400" /> :
+               fileKey === "audio" ? <FileAudio className="w-5 h-5 text-zinc-500 dark:text-zinc-400" /> :
+               <FileVideo className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />}
             </div>
             <div className="flex flex-col gap-0.5 min-w-0">
-              <p className="font-manrope text-sm text-zinc-300">
-                <span className="text-fuchsia-400 font-medium">Click to browse</span> or drag and drop
+              <p className="font-manrope text-sm text-zinc-700 dark:text-zinc-300">
+                <span className="text-fuchsia-500 dark:text-fuchsia-400 font-medium">Click to browse</span> or drag and drop
               </p>
               <p className="font-manrope text-xs text-zinc-500">{hint}</p>
             </div>
-            <Upload className="w-4 h-4 text-zinc-600 ml-auto shrink-0" />
+            <Upload className="w-4 h-4 text-zinc-400 dark:text-zinc-600 ml-auto shrink-0" />
           </div>
         )}
 
@@ -119,7 +119,7 @@ export default function FileDropZone({
           <div className="flex items-center gap-3 px-5 py-4">
             <Loader2 className="w-5 h-5 text-fuchsia-400 animate-spin shrink-0" />
             <div>
-              <p className="font-manrope text-sm text-zinc-300">Validating…</p>
+              <p className="font-manrope text-sm text-zinc-700 dark:text-zinc-300">Validating…</p>
               <p className="font-manrope text-xs text-zinc-500 truncate max-w-xs">{state.file?.name}</p>
             </div>
           </div>
@@ -132,13 +132,13 @@ export default function FileDropZone({
               <div className="flex items-center gap-2.5">
                 <Loader2 className="w-4 h-4 text-fuchsia-400 animate-spin shrink-0" />
                 <div>
-                  <p className="font-manrope text-sm text-zinc-300 truncate max-w-[220px]">{state.file?.name}</p>
+                  <p className="font-manrope text-sm text-zinc-700 dark:text-zinc-300 truncate max-w-[220px]">{state.file?.name}</p>
                   <p className="font-manrope text-xs text-zinc-500">{formatBytes(state.file?.size ?? 0)}</p>
                 </div>
               </div>
               <span className="font-manrope text-sm font-semibold text-fuchsia-400 tabular-nums">{state.progress}%</span>
             </div>
-            <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+            <div className="w-full h-1.5 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-fuchsia-600 to-purple-600 rounded-full transition-all duration-300"
                 style={{ width: `${state.progress}%` }}
@@ -150,9 +150,8 @@ export default function FileDropZone({
         {/* Done state */}
         {isDone && (
           <div className="flex items-center gap-4 px-5 py-3">
-            {/* Preview */}
             {showPreview && state.localPreview && (
-              <div className="w-16 h-10 rounded-md overflow-hidden bg-zinc-800 shrink-0">
+              <div className="w-16 h-10 rounded-md overflow-hidden bg-zinc-100 dark:bg-zinc-800 shrink-0">
                 {previewType === "image" ? (
                   <img src={state.localPreview} alt="preview" className="w-full h-full object-cover" />
                 ) : (
@@ -161,10 +160,10 @@ export default function FileDropZone({
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <p className="font-manrope text-sm text-zinc-200 truncate">{state.file?.name}</p>
+              <p className="font-manrope text-sm text-zinc-800 dark:text-zinc-200 truncate">{state.file?.name}</p>
               <p className="font-manrope text-xs text-zinc-500">{formatBytes(state.file?.size ?? 0)}</p>
             </div>
-            <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+            <CheckCircle2 className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0" />
           </div>
         )}
 
@@ -173,12 +172,12 @@ export default function FileDropZone({
           <div className="flex items-start gap-3 px-5 py-4">
             <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
-              <p className="font-manrope text-sm font-medium text-red-300">Validation failed</p>
-              <p className="font-manrope text-xs text-red-400/80 mt-0.5 leading-relaxed">{state.error}</p>
+              <p className="font-manrope text-sm font-medium text-red-500 dark:text-red-300">Validation failed</p>
+              <p className="font-manrope text-xs text-red-500/80 dark:text-red-400/80 mt-0.5 leading-relaxed">{state.error}</p>
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }}
-                className="mt-2 font-manrope text-xs text-fuchsia-400 hover:text-fuchsia-300 underline transition-colors"
+                className="mt-2 font-manrope text-xs text-fuchsia-500 dark:text-fuchsia-400 hover:text-fuchsia-400 dark:hover:text-fuchsia-300 underline transition-colors"
               >
                 Try a different file
               </button>

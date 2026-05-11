@@ -46,13 +46,11 @@ export default function UploadStudio({ userId }: UploadStudioProps) {
   }
 
   async function handleFileSelect(key: FileKey, file: File) {
-    // Revoke previous preview if any
     const prev = uploads[key].localPreview;
     if (prev) URL.revokeObjectURL(prev);
 
     setUpload(key, { file, status: "validating", error: null, progress: 0, url: null, localPreview: null });
 
-    // Validate
     try {
       await validate(key, file);
     } catch (err: unknown) {
@@ -60,14 +58,12 @@ export default function UploadStudio({ userId }: UploadStudioProps) {
       return;
     }
 
-    // Build local preview URL for image/video
     const localPreview = (key === "thumbnail" || key === "preview")
       ? URL.createObjectURL(file)
       : null;
 
     setUpload(key, { status: "uploading", progress: 0, localPreview });
 
-    // Get signed upload URL
     try {
       const ext = file.name.split(".").pop()?.toLowerCase() ?? "bin";
       const res = await fetch("/api/shows/upload-url", {
@@ -130,14 +126,13 @@ export default function UploadStudio({ userId }: UploadStudioProps) {
 
   return (
     <div className="flex min-h-screen">
-      {/* ── Left: form ── */}
+      {/* Left: form */}
       <div className="flex-1 py-10 px-10 xl:px-14 overflow-y-auto">
-        {/* Page header */}
         <div className="mb-8">
-          <h1 className="font-raleway text-2xl font-semibold text-white tracking-tight">
+          <h1 className="font-raleway text-2xl font-semibold text-zinc-900 dark:text-white tracking-tight">
             Upload a Show
           </h1>
-          <p className="font-manrope text-sm text-zinc-400 mt-1">
+          <p className="font-manrope text-sm text-zinc-600 dark:text-zinc-400 mt-1">
             Submit your immersive projection content for venue licensing.
           </p>
         </div>
@@ -153,24 +148,24 @@ export default function UploadStudio({ userId }: UploadStudioProps) {
                   <div
                     className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-manrope font-semibold transition-all ${
                       done
-                        ? "bg-emerald-500/20 border border-emerald-500/40 text-emerald-400"
+                        ? "bg-emerald-500/20 border border-emerald-500/40 text-emerald-500 dark:text-emerald-400"
                         : active
                         ? "bg-gradient-to-br from-fuchsia-600 to-purple-600 text-white"
-                        : "bg-zinc-900 border border-zinc-800 text-zinc-600"
+                        : "bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-400 dark:text-zinc-600"
                     }`}
                   >
                     {done ? <CheckCircle2 className="w-3.5 h-3.5" /> : n}
                   </div>
                   <span
                     className={`font-manrope text-xs font-medium transition-colors ${
-                      active ? "text-white" : done ? "text-zinc-400" : "text-zinc-600"
+                      active ? "text-zinc-900 dark:text-white" : done ? "text-zinc-600 dark:text-zinc-400" : "text-zinc-400 dark:text-zinc-600"
                     }`}
                   >
                     {label}
                   </span>
                 </div>
                 {i < STEPS.length - 1 && (
-                  <div className={`w-10 h-px mx-3 transition-colors ${step > n ? "bg-emerald-800" : "bg-zinc-800"}`} />
+                  <div className={`w-10 h-px mx-3 transition-colors ${step > n ? "bg-emerald-500/40" : "bg-zinc-200 dark:bg-zinc-800"}`} />
                 )}
               </div>
             );
@@ -207,8 +202,8 @@ export default function UploadStudio({ userId }: UploadStudioProps) {
         </div>
       </div>
 
-      {/* ── Right: sticky spec panel ── */}
-      <div className="hidden xl:block w-[320px] shrink-0 sticky top-0 self-start h-screen overflow-y-auto border-l border-zinc-900 bg-zinc-950/80">
+      {/* Right: sticky spec panel */}
+      <div className="hidden xl:block w-[320px] shrink-0 sticky top-0 self-start h-screen overflow-y-auto border-l border-zinc-200 dark:border-zinc-900 bg-zinc-50/80 dark:bg-zinc-950/80">
         <SpecPanel />
       </div>
     </div>

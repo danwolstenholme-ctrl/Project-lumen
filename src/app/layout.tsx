@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Raleway, Manrope } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import Toaster from "@/components/Toaster";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 
 const raleway = Raleway({
@@ -25,17 +26,26 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <ClerkProvider>
       <html
         lang="en"
-        className={`${raleway.variable} ${manrope.variable} h-full antialiased`}
+        className={`${raleway.variable} ${manrope.variable} h-full antialiased dark`}
+        suppressHydrationWarning
       >
-        <body className="min-h-full flex flex-col bg-lumen-bg text-[#F4F4F5]">
-          {children}
+        {/* Inline script prevents flash-of-wrong-theme before React hydrates */}
+        <head>
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `(function(){try{var t=localStorage.getItem('lumen-theme')||'dark';document.documentElement.classList.toggle('dark',t==='dark')}catch(e){}})()`,
+            }}
+          />
+        </head>
+        <body className="min-h-full flex flex-col bg-zinc-100 dark:bg-lumen-bg text-zinc-900 dark:text-[#F4F4F5]">
+          <ThemeProvider>
+            {children}
+          </ThemeProvider>
           <Toaster />
         </body>
       </html>

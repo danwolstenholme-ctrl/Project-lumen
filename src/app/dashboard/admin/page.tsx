@@ -6,14 +6,14 @@ export default async function AdminDashboardPage() {
   if (!userId) redirect("/sign-in");
 
   return (
-    <div className="min-h-screen bg-[#09090B] flex flex-col items-center justify-center gap-4">
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4">
       <h1
-        className="text-3xl text-white tracking-widest uppercase"
+        className="text-3xl text-zinc-900 dark:text-white tracking-widest uppercase"
         style={{ fontFamily: "var(--font-raleway)", fontWeight: 700 }}
       >
         Admin Panel
       </h1>
-      <p className="text-[#A1A1AA] text-sm tracking-wide">
+      <p className="text-zinc-500 text-sm tracking-wide">
         Review queue and management — coming soon.
       </p>
     </div>
