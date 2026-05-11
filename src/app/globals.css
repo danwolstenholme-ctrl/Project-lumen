@@ -25,6 +25,13 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-raleway), system-ui, sans-serif;
 }
 
+.text-gradient {
+  background: linear-gradient(90deg, #d946ef 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 /* Clerk component dark-brand overrides */
 .cl-rootBox {
   width: 100%;
