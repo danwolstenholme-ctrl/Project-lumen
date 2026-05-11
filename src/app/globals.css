@@ -32,16 +32,6 @@ h1, h2, h3, h4, h5, h6 {
   background-clip: text;
 }
 
-/* Clerk component dark-brand overrides */
 .cl-rootBox {
   width: 100%;
-}
-.cl-card {
-  background: rgba(13, 13, 18, 0.85) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow:
-    0 0 80px rgba(217, 70, 239, 0.06),
-    0 0 40px rgba(168, 85, 247, 0.04) !important;
-  -webkit-backdrop-filter: blur(24px) !important;
-  backdrop-filter: blur(24px) !important;
 }
