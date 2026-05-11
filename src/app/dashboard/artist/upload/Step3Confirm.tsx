@@ -116,6 +116,7 @@ export default function Step3Confirm({ details, uploads, onSubmit, onBack, submi
               type="button"
               role="checkbox"
               aria-checked={checked}
+              aria-label={label}
               onClick={() => set(!checked)}
               className={`w-5 h-5 mt-0.5 rounded border flex items-center justify-center shrink-0 transition-all ${
                 checked

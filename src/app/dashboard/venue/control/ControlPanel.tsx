@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { toast } from "@/app/dashboard/venue/toast";
-import type { Table, Show, Venue, PlayState, TablePlayMap } from "./types";
+import type { Table, Show, Venue, TablePlayMap } from "./types";
 import TableList from "./TableList";
 import ControlShowLibrary from "./ControlShowLibrary";
 import NowPlaying from "./NowPlaying";
@@ -54,7 +54,8 @@ export default function ControlPanel({ initialTables, initialShows, venue, venue
   const toggleTable = useCallback((id: string) => {
     setSelectedTableIds((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   }, []);

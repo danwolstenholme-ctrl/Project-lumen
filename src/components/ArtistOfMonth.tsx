@@ -14,28 +14,20 @@ export default async function ArtistOfMonth() {
 
   if (!artist?.slug) return null;
 
-  const { data: shows } = await supabase
-    .from("shows")
-    .select("id, title, thumbnail_url")
-    .eq("status", "published")
-    .order("featured", { ascending: false })
-    .limit(1)
-    .then(async (res) => {
-      // get artist_id first
-      const { data: userRow } = await supabase
-        .from("users")
-        .select("clerk_id")
-        .eq("slug", artist.slug!)
-        .maybeSingle();
-      if (!userRow) return { data: [] };
-      return supabase
+  const { data: userRow } = await supabase
+    .from("users")
+    .select("clerk_id")
+    .eq("slug", artist.slug!)
+    .maybeSingle();
+  const { data: shows } = userRow
+    ? await supabase
         .from("shows")
         .select("id, title, thumbnail_url")
         .eq("artist_id", userRow.clerk_id)
         .eq("status", "published")
         .order("featured", { ascending: false })
-        .limit(3);
-    });
+        .limit(3)
+    : { data: [] };
 
   return (
     <section className="w-full bg-gradient-to-r from-amber-600/10 to-amber-500/5 border border-amber-500/20 rounded-2xl overflow-hidden">

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Zap, LayoutGrid, BookOpen, Monitor, Settings, LogOut, DollarSign, Sparkles, X, Sun, Moon, Play, Users } from "lucide-react";
+import { Zap, LayoutGrid, BookOpen, Monitor, LogOut, DollarSign, Sparkles, X, Sun, Moon, Play, Settings } from "lucide-react";
 import { useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/components/ThemeProvider";

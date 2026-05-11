@@ -186,6 +186,8 @@ export default function AdminShows({ initialShows }: { initialShows: Show[] }) {
                         onChange={(e) => setRejectionReason(e.target.value)}
                         rows={2}
                         placeholder="e.g. Video resolution is 1920×1080. We require exactly 3840×2160."
+                        aria-label="Rejection reason"
+                        title="Rejection reason"
                         className="flex-1 px-3 py-2 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 text-sm font-manrope text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-fuchsia-500 resize-none transition-colors"
                       />
                       <button

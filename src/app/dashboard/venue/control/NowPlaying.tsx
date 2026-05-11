@@ -98,6 +98,8 @@ function SliderRow({
           max={100}
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
+          aria-label={label}
+          title={label}
           className="w-full h-1.5 accent-fuchsia-500 rounded-full cursor-pointer"
           style={{ minHeight: 24 }}
         />

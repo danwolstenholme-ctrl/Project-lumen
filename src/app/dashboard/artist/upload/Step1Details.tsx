@@ -58,6 +58,7 @@ export default function Step1Details({ details, onChange, onNext }: Step1Details
           onChange={(e) => onChange({ title: e.target.value })}
           placeholder="e.g. Abyssal Tide"
           maxLength={100}
+          aria-label="Show title"
           className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white font-manrope text-sm placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors"
         />
       </div>
@@ -75,6 +76,7 @@ export default function Step1Details({ details, onChange, onNext }: Step1Details
           onChange={(e) => onChange({ description: e.target.value.slice(0, MAX_DESC) })}
           placeholder="Describe the atmosphere, mood, and visual journey of your show…"
           rows={4}
+          aria-label="Show description"
           className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white font-manrope text-sm placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors resize-none leading-relaxed"
         />
       </div>
@@ -114,7 +116,7 @@ export default function Step1Details({ details, onChange, onNext }: Step1Details
               className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs font-manrope text-zinc-700 dark:text-zinc-300"
             >
               {tag}
-              <button type="button" onClick={() => onChange({ tags: details.tags.filter((t) => t !== tag) })} className="text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300">
+              <button type="button" title={`Remove tag ${tag}`} aria-label={`Remove tag ${tag}`} onClick={() => onChange({ tags: details.tags.filter((t) => t !== tag) })} className="text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300">
                 <X className="w-3 h-3" />
               </button>
             </span>
@@ -127,6 +129,7 @@ export default function Step1Details({ details, onChange, onNext }: Step1Details
               onKeyDown={onTagKeyDown}
               onBlur={addTag}
               placeholder={details.tags.length === 0 ? "Type a tag and press Enter…" : ""}
+              aria-label="Add a tag"
               className="flex-1 min-w-[120px] bg-transparent text-sm font-manrope text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none"
             />
           )}

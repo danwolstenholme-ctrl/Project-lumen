@@ -116,6 +116,8 @@ export default function ArtistStudio({
                   onChange={(e) => setBioInput(e.target.value)}
                   maxLength={160}
                   placeholder="One-line bio…"
+                  aria-label="Bio"
+                  title="Bio"
                   className="flex-1 bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-1.5 text-sm font-manrope text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-fuchsia-500 transition-colors"
                 />
                 <button type="button" title="Save bio" onClick={saveBio} disabled={savingBio} className="p-1.5 rounded-lg bg-fuchsia-600 hover:bg-fuchsia-500 text-white transition-colors disabled:opacity-50">

@@ -19,7 +19,7 @@ interface Show {
 interface ShowLibraryProps {
   shows: Show[];
   licensedShowIds: string[];
-  venueUserId: string;
+  venueUserId?: string;
 }
 
 const categoryColors: Record<string, string> = {
@@ -34,11 +34,13 @@ function categoryClass(cat: string | null) {
   return cat ? (categoryColors[cat.toLowerCase()] ?? "text-zinc-500 bg-zinc-400/10 border-zinc-400/20") : "text-zinc-500 bg-zinc-400/10 border-zinc-400/20";
 }
 
-export default function ShowLibrary({ shows, licensedShowIds, venueUserId }: ShowLibraryProps) {
+// `venueUserId` is accepted from the page but isn't needed in the client —
+// the licensing API derives it from Clerk's `auth()`.
+export default function ShowLibrary({ shows, licensedShowIds }: ShowLibraryProps) {
   const [query, setQuery] = useState("");
   const [licensed, setLicensed] = useState(new Set(licensedShowIds));
   const [licensing, setLicensing] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   const filtered = shows.filter((s) =>
     !query ||
@@ -101,6 +103,8 @@ export default function ShowLibrary({ shows, licensedShowIds, venueUserId }: Sho
           placeholder="Search shows, artists, categories…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          aria-label="Search shows"
+          title="Search shows"
           className="w-full pl-9 pr-4 py-2.5 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-sm font-manrope text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-zinc-300 dark:focus:border-zinc-700 transition-colors"
         />
       </div>
@@ -180,6 +184,7 @@ export default function ShowLibrary({ shows, licensedShowIds, venueUserId }: Sho
                   )}
 
                   <button
+                    type="button"
                     onClick={() => !isLicensed && licenseShow(show.id)}
                     disabled={isLicensed || isLoading}
                     className={`mt-auto w-full py-2 rounded-lg text-xs font-manrope font-semibold transition-all flex items-center justify-center gap-1.5 ${

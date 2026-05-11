@@ -13,7 +13,7 @@ export default async function ArtistDashboardPage() {
 
   const supabase = createAdminClient();
 
-  const [{ data: shows }, { data: userRow }, { data: licenseRows }, { data: earningRows }] =
+  const [{ data: shows }, { data: userRow }, { data: earningRows }] =
     await Promise.all([
       supabase
         .from("shows")
@@ -25,10 +25,6 @@ export default async function ArtistDashboardPage() {
         .select("slug, bio, verified")
         .eq("clerk_id", userId)
         .maybeSingle(),
-      supabase
-        .from("licenses")
-        .select("show_id, venue_id")
-        .in("show_id", []),  // placeholder — replaced below
       supabase
         .from("earnings")
         .select("show_id, artist_share, status, created_at")

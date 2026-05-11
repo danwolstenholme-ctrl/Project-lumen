@@ -1,6 +1,5 @@
 "use client";
 
-import { useRef } from "react";
 import { Search, Film, Sparkles, Trophy } from "lucide-react";
 import type { Show } from "./types";
 import ShowExpandModal from "./ShowExpandModal";
@@ -70,6 +69,8 @@ export default function ControlShowLibrary({
             placeholder="Search…"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
+            aria-label="Search show library"
+            title="Search show library"
             className="w-full pl-8 pr-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-sm font-manrope text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-700 transition-colors"
           />
         </div>

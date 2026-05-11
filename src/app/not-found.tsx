@@ -32,10 +32,10 @@ export default function NotFound() {
             className="text-zinc-900 dark:text-white text-xl tracking-wide"
             style={{ fontFamily: "var(--font-raleway)", fontWeight: 600 }}
           >
-            This scene doesn't exist.
+            This scene doesn&apos;t exist.
           </p>
           <p className="text-zinc-500 dark:text-[#52525B] text-sm">
-            The page you're looking for has left the stage.
+            The page you&apos;re looking for has left the stage.
           </p>
         </div>
 

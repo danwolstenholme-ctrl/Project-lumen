@@ -111,7 +111,7 @@ export default function OnboardingPage() {
             className="text-zinc-600 dark:text-zinc-400 text-sm"
             style={{ fontFamily: "var(--font-manrope)" }}
           >
-            This sets up your dashboard. You can't change this later.
+            This sets up your dashboard. You can&apos;t change this later.
           </p>
         </div>
 

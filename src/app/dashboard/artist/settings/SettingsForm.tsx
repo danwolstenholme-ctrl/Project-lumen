@@ -112,6 +112,7 @@ export default function SettingsForm({
               ref={fileRef}
               type="file"
               accept="image/jpeg,image/png"
+              aria-label="Upload avatar photo"
               className="hidden"
               onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadAvatar(f); }}
             />
@@ -141,6 +142,7 @@ export default function SettingsForm({
             value={slug}
             onChange={(e) => setSlug(slugify(e.target.value))}
             placeholder="your-name"
+            aria-label="Public profile slug"
             className="flex-1 px-3 py-2.5 bg-white dark:bg-zinc-900 text-sm font-manrope text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none"
           />
         </div>
@@ -211,9 +213,9 @@ function Field({
     <div className="flex flex-col gap-1.5">
       <label className="font-manrope text-xs text-zinc-500 uppercase tracking-widest">{label}</label>
       {multiline ? (
-        <textarea value={value} onChange={(e) => onChange(e.target.value)} maxLength={maxLength} rows={3} className={`${cls} resize-none`} />
+        <textarea aria-label={label} title={label} value={value} onChange={(e) => onChange(e.target.value)} maxLength={maxLength} rows={3} className={`${cls} resize-none`} />
       ) : (
-        <input type={type ?? "text"} value={value} onChange={(e) => onChange(e.target.value)} maxLength={maxLength} className={cls} />
+        <input aria-label={label} title={label} type={type ?? "text"} value={value} onChange={(e) => onChange(e.target.value)} maxLength={maxLength} className={cls} />
       )}
       {hint && <p className="font-manrope text-xs text-zinc-500">{hint}</p>}
     </div>

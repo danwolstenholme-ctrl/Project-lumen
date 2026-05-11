@@ -3,8 +3,8 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
-  Play, Pause, Square, Volume2, Sun, Film, Sparkles, Settings2, X, Check,
-  MonitorPlay, Layers, Wifi, WifiOff, Search, AlertCircle, ChevronRight, Zap,
+  Play, Square, Volume2, Sun, Film, Sparkles, Settings2, X, Check,
+  MonitorPlay, Layers, Wifi, WifiOff, Search, ChevronRight, Zap,
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { toast } from "@/app/dashboard/venue/toast";
@@ -85,7 +85,6 @@ export default function QuickPlay({
   useEffect(() => () => { wsRef.current.forEach((ws) => ws.close()); }, []);
 
   const onlineTables = tables.filter((t) => t.status !== "offline");
-  const playingTables = tables.filter((t) => t.status === "online_playing");
 
   const connectAndSend = useCallback((table: Table, msg: object) => {
     if (!table.ip_address) {
@@ -236,7 +235,7 @@ export default function QuickPlay({
               {/* Eyebrow */}
               <div className="flex items-center justify-between">
                 <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300 text-[10px] uppercase tracking-widest font-manrope font-semibold">
-                  <Sparkles className="w-3 h-3" /> Tonight's Show
+                  <Sparkles className="w-3 h-3" /> Tonight&apos;s Show
                 </span>
                 <button
                   type="button"
@@ -421,10 +420,10 @@ export default function QuickPlay({
           >
             <div className="px-7 py-5 border-b border-white/[0.06] flex items-center justify-between">
               <div>
-                <p className="font-raleway text-xl font-semibold">Pick tonight's show</p>
+                <p className="font-raleway text-xl font-semibold">Pick tonight&apos;s show</p>
                 <p className="font-manrope text-xs text-zinc-500 mt-0.5">Sets the default. You can change anytime.</p>
               </div>
-              <button type="button" onClick={() => setPickerOpen(false)} className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-colors">
+              <button type="button" title="Close picker" aria-label="Close picker" onClick={() => setPickerOpen(false)} className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -437,6 +436,8 @@ export default function QuickPlay({
                   placeholder="Search shows, artists, categories…"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  aria-label="Search shows"
+                  title="Search shows"
                   className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm font-manrope text-white placeholder:text-zinc-500 focus:outline-none focus:border-fuchsia-500/40 transition-colors"
                 />
               </div>
@@ -506,6 +507,8 @@ function SliderRow({ icon: Icon, label, value, onChange }: {
         <input
           type="range" min={0} max={100} value={value}
           onChange={(e) => onChange(Number(e.target.value))}
+          aria-label={label}
+          title={label}
           className="w-full h-1.5 accent-fuchsia-500 rounded-full cursor-pointer"
           style={{ minHeight: 24 }}
         />

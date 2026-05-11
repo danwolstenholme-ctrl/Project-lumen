@@ -1,7 +1,7 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Film, Users, Store, DollarSign, Clock, AlertCircle, ArrowRight, Trophy, BadgeCheck, Sparkles } from "lucide-react";
+import { Film, Users, Store, DollarSign, Clock, AlertCircle, ArrowRight, Sparkles } from "lucide-react";
 import { createAdminClient } from "@/utils/supabase/admin";
 
 export default async function AdminDashboardPage() {

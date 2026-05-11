@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
-  Zap, Palette, Building2, ArrowRight, Sparkles, Film, Wand2, DollarSign,
-  Globe, MonitorPlay, Trophy, BadgeCheck, ChevronRight, Play, Mail, Gem,
+  Zap, Palette, Building2, ArrowRight, Sparkles, Film, Wand2,
+  MonitorPlay, Trophy, ChevronRight, Play, Mail, Gem,
 } from "lucide-react";
 
 interface FeaturedShow {
@@ -127,7 +127,7 @@ export default function MarketingLanding({ featured, artistOfMonth, stats }: Pro
           </h1>
 
           <p className="font-manrope text-zinc-400 text-lg max-w-2xl leading-relaxed">
-            Project Lumen lights up restaurant tables with breathing, immersive shows from the world's most talented digital artists. One tap on an iPad. Every table, transformed.
+            Project Lumen lights up restaurant tables with breathing, immersive shows from the world&apos;s most talented digital artists. One tap on an iPad. Every table, transformed.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-3">
@@ -172,7 +172,7 @@ export default function MarketingLanding({ featured, artistOfMonth, stats }: Pro
                 Featured Experiences
               </span>
               <h2 className="font-raleway text-3xl sm:text-4xl font-semibold mt-2 tracking-tight">
-                Tonight's marquee.
+                Tonight&apos;s marquee.
               </h2>
             </div>
             <Link
@@ -310,7 +310,7 @@ export default function MarketingLanding({ featured, artistOfMonth, stats }: Pro
                 Your art, on every table in the world.
               </h3>
               <p className="font-manrope text-zinc-400 leading-relaxed mb-8">
-                Upload once. Earn forever. 70% royalty on every license, paid monthly. Plus boost placement and earn the "Artist of the Month" spotlight.
+                Upload once. Earn forever. 70% royalty on every license, paid monthly. Plus boost placement and earn the &ldquo;Artist of the Month&rdquo; spotlight.
               </p>
               <ul className="flex flex-col gap-2.5 mb-8">
                 {[
@@ -524,7 +524,7 @@ export default function MarketingLanding({ featured, artistOfMonth, stats }: Pro
               className="font-raleway font-semibold tracking-tight leading-[0.95] mx-auto max-w-3xl"
               style={{ fontSize: "clamp(2rem, 5vw, 3.75rem)", letterSpacing: "-0.02em" }}
             >
-              Tonight's service starts in <span className="text-gradient">a single tap</span>.
+              Tonight&apos;s service starts in <span className="text-gradient">a single tap</span>.
             </h2>
             <p className="font-manrope text-zinc-400 mt-5 max-w-xl mx-auto">
               Join the artists and venues redefining what dining feels like. Set up takes ten minutes.

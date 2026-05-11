@@ -24,7 +24,9 @@ interface UploadStudioProps {
   userId: string;
 }
 
-export default function UploadStudio({ userId }: UploadStudioProps) {
+// `userId` is accepted for parity with the page component but isn't consumed
+// here directly — the upload routes derive it from Clerk's `auth()`.
+export default function UploadStudio({}: UploadStudioProps) {
   const router = useRouter();
   const [showId] = useState(() => crypto.randomUUID());
   const [step, setStep] = useState(1);

@@ -54,7 +54,6 @@ export default function FileDropZone({
   const isActive = state.status !== "idle";
   const hasError = state.status === "error";
   const isDone = state.status === "done";
-  const isUploading = state.status === "uploading" || state.status === "validating";
 
   return (
     <div className="flex flex-col gap-2">
@@ -92,6 +91,7 @@ export default function FileDropZone({
           ref={inputRef}
           type="file"
           accept={accept}
+          aria-label={label}
           className="hidden"
           onChange={handleChange}
         />

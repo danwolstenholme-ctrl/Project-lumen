@@ -1,4 +1,7 @@
-export const clerkAppearance: any = {
+// Clerk's `Appearance` type isn't exported as a top-level package, but
+// `appearance` props on <SignIn>/<SignUp> accept arbitrary partial objects.
+// Inferring the literal type from the object is sufficient and avoids `any`.
+export const clerkAppearance = {
   variables: {
     colorPrimary: "#D946EF",
     colorBackground: "#ffffff",

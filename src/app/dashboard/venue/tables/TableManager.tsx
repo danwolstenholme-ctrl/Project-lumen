@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Pencil, Trash2, Check, X, Wifi, WifiOff, Loader2, Monitor, AlertCircle } from "lucide-react";
+import { Plus, Pencil, Trash2, Check, X, Wifi, Loader2, Monitor, AlertCircle } from "lucide-react";
 import { toast } from "@/utils/toast";
 
 interface Table {
@@ -23,7 +23,6 @@ export default function TableManager({ venueName: initialVenueName, hasVenue, in
   const [tables, setTables] = useState<Table[]>(initialTables);
   const [venueName, setVenueName] = useState(initialVenueName);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [isAdding, setIsAdding] = useState(false);
   const [editLabel, setEditLabel] = useState("");
   const [editIp, setEditIp] = useState("");
   const [busy, setBusy] = useState(false);
@@ -51,21 +50,18 @@ export default function TableManager({ venueName: initialVenueName, hasVenue, in
 
   function beginAdd() {
     setEditingId("__new__");
-    setIsAdding(true);
     setEditLabel(`Table ${tables.length + 1}`);
     setEditIp("");
   }
 
   function beginEdit(t: Table) {
     setEditingId(t.id);
-    setIsAdding(false);
     setEditLabel(t.label);
     setEditIp(t.ip_address ?? "");
   }
 
   function cancelEdit() {
     setEditingId(null);
-    setIsAdding(false);
   }
 
   async function saveTable() {
@@ -148,7 +144,7 @@ export default function TableManager({ venueName: initialVenueName, hasVenue, in
       <div className="mb-8">
         <h1 className="font-raleway text-2xl font-semibold text-zinc-900 dark:text-white tracking-tight">Tables</h1>
         <p className="font-manrope text-sm text-zinc-500 mt-1">
-          Each table is a projector running the Lumen player. Add the table's local IP so the dashboard can control it.
+          Each table is a projector running the Lumen player. Add the table&apos;s local IP so the dashboard can control it.
         </p>
       </div>
 
@@ -165,6 +161,8 @@ export default function TableManager({ venueName: initialVenueName, hasVenue, in
                   onChange={(e) => setVenueNameInput(e.target.value)}
                   maxLength={80}
                   placeholder="e.g. The Lumen Room"
+                  aria-label="Venue name"
+                  title="Venue name"
                   className="flex-1 max-w-md px-3 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-sm font-manrope text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-fuchsia-500 transition-colors"
                 />
                 <button
@@ -227,7 +225,7 @@ export default function TableManager({ venueName: initialVenueName, hasVenue, in
             </div>
             <p className="font-raleway text-zinc-900 dark:text-white font-semibold">No tables yet</p>
             <p className="font-manrope text-sm text-zinc-500 max-w-sm">
-              Add a table for each projector in your dining room. You'll need each projector's local IP address.
+              Add a table for each projector in your dining room. You&apos;ll need each projector&apos;s local IP address.
             </p>
           </div>
         ) : (
@@ -301,7 +299,7 @@ export default function TableManager({ venueName: initialVenueName, hasVenue, in
         <p className="font-manrope text-[11px] uppercase tracking-widest text-zinc-500 font-semibold mb-2">Setup tips</p>
         <ul className="flex flex-col gap-1.5 text-sm font-manrope text-zinc-600 dark:text-zinc-400">
           <li>• Each Lumen player listens on port <span className="font-mono text-zinc-900 dark:text-zinc-200">8765</span>.</li>
-          <li>• Use the projector's local IP — typically <span className="font-mono text-zinc-900 dark:text-zinc-200">192.168.x.x</span>.</li>
+          <li>• Use the projector&apos;s local IP — typically <span className="font-mono text-zinc-900 dark:text-zinc-200">192.168.x.x</span>.</li>
           <li>• Make sure your iPad and projectors are on the same Wi-Fi network.</li>
           <li>• Click <Wifi className="inline w-3 h-3 mx-0.5" /> to test connectivity to any table.</li>
         </ul>
@@ -327,6 +325,8 @@ function EditRow({
           onChange={(e) => onLabelChange(e.target.value)}
           placeholder="Table label (e.g. Window 1)"
           maxLength={40}
+          aria-label="Table label"
+          title="Table label"
           className="px-3 py-2 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 text-sm font-manrope text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-fuchsia-500 transition-colors"
         />
         <input
@@ -334,6 +334,8 @@ function EditRow({
           value={ip}
           onChange={(e) => onIpChange(e.target.value)}
           placeholder="192.168.1.50"
+          aria-label="Table IP address"
+          title="Table IP address"
           className="px-3 py-2 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 text-sm font-mono text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-fuchsia-500 transition-colors"
         />
       </div>

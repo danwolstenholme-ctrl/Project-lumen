@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 type Theme = "dark" | "light";
 
@@ -9,15 +9,16 @@ const ThemeContext = createContext<{ theme: Theme; toggle: () => void }>({
   toggle: () => {},
 });
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark");
+function readInitial(): Theme {
+  if (typeof window === "undefined") return "dark";
+  return (localStorage.getItem("lumen-theme") as Theme | null) ?? "dark";
+}
 
-  useEffect(() => {
-    const saved = localStorage.getItem("lumen-theme") as Theme | null;
-    const initial = saved ?? "dark";
-    setTheme(initial);
-    document.documentElement.classList.toggle("dark", initial === "dark");
-  }, []);
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  // Lazy init reads localStorage on the first client render. The inline
+  // <head> script keeps the DOM class in sync before hydration, so no
+  // setState-in-effect is needed.
+  const [theme, setTheme] = useState<Theme>(readInitial);
 
   function toggle() {
     setTheme((prev) => {

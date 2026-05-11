@@ -296,6 +296,8 @@ export default function EarningsDashboard({
                 value={payoutEmail}
                 onChange={(e) => setPayoutEmail(e.target.value)}
                 placeholder="your@paypal.com"
+                aria-label="PayPal email"
+                title="PayPal email"
                 className="bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm font-manrope text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-fuchsia-500 transition-colors"
               />
             </div>
@@ -308,6 +310,8 @@ export default function EarningsDashboard({
                 value={payoutIban}
                 onChange={(e) => setPayoutIban(e.target.value)}
                 placeholder="IE12 BOFI 9000 0112 3456 78"
+                aria-label="IBAN"
+                title="IBAN"
                 className="bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm font-manrope text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-fuchsia-500 transition-colors"
               />
             </div>

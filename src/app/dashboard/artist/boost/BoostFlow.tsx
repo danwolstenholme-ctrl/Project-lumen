@@ -53,7 +53,7 @@ export default function BoostFlow({ shows, preselectedShowId, success }: Props) 
         <div>
           <h1 className="font-raleway text-2xl font-semibold text-zinc-900 dark:text-white">Your show is now featured.</h1>
           <p className="font-manrope text-sm text-zinc-600 dark:text-zinc-400 mt-2 max-w-sm">
-            Venues will see it at the top of their library. You'll receive a confirmation email shortly.
+            Venues will see it at the top of their library. You&apos;ll receive a confirmation email shortly.
           </p>
         </div>
         <Link
