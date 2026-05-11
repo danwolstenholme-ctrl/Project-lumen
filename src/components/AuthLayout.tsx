@@ -136,7 +136,7 @@ export default function AuthLayout({ children, headline, sub }: AuthLayoutProps)
           </span>
         </Link>
 
-        <div className="w-full max-w-sm">
+        <div className="w-full max-w-md">
           {children}
         </div>
       </div>
