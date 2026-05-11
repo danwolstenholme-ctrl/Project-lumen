@@ -2,8 +2,6 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-04-22.dahlia" });
-
 const PRICES: Record<string, number> = {
   featured_show: 7500,      // €75 in cents
   homepage_feature: 15000,  // €150 in cents
@@ -17,6 +15,8 @@ export async function POST(req: Request) {
   if (!PRICES[placement] || !showId || !months) {
     return NextResponse.json({ error: "Invalid parameters" }, { status: 400 });
   }
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-04-22.dahlia" });
 
   const unitAmount = PRICES[placement];
   const discountMap: Record<number, number> = { 1: 0, 3: 10, 6: 20 };

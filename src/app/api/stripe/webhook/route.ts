@@ -3,13 +3,12 @@ import Stripe from "stripe";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { Resend } from "resend";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-04-22.dahlia" });
-const resend = new Resend(process.env.RESEND_API_KEY!);
-
 export async function POST(req: Request) {
   const body = await req.text();
   const sig = req.headers.get("stripe-signature");
   if (!sig) return NextResponse.json({ error: "No signature" }, { status: 400 });
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-04-22.dahlia" });
 
   let event: Stripe.Event;
   try {
@@ -39,7 +38,6 @@ export async function POST(req: Request) {
       .eq("id", showId)
       .eq("artist_id", userId);
 
-    // Send confirmation email
     const { data: userRow } = await supabase
       .from("users")
       .select("email, name")
@@ -47,6 +45,7 @@ export async function POST(req: Request) {
       .maybeSingle();
 
     if (userRow?.email) {
+      const resend = new Resend(process.env.RESEND_API_KEY!);
       await resend.emails.send({
         from: "Project Lumen <noreply@projectlumen.io>",
         to: userRow.email,
