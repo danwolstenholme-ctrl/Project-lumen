@@ -14,7 +14,7 @@ export default function SignInPage() {
       }
       sub="Your stage awaits. Sign in to access your shows, venues, and licensing dashboard."
     >
-      <SignIn appearance={clerkAppearance} />
+      <SignIn appearance={clerkAppearance} forceRedirectUrl="/dashboard" />
     </AuthLayout>
   );
 }

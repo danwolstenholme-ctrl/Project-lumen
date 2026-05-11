@@ -15,7 +15,7 @@ export default function SignUpPage() {
       }
       sub="Artists upload. Venues transform. Royalties flow. Join the platform redefining dining entertainment."
     >
-      <SignUp appearance={clerkAppearance} />
+      <SignUp appearance={clerkAppearance} forceRedirectUrl="/dashboard" />
     </AuthLayout>
   );
 }
