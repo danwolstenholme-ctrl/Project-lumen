@@ -25,6 +25,10 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-raleway), system-ui, sans-serif;
 }
 
+/* ── Typography ── */
+.font-raleway { font-family: var(--font-raleway), system-ui, sans-serif; }
+.font-manrope  { font-family: var(--font-manrope), system-ui, sans-serif; }
+
 .text-gradient {
   background: linear-gradient(90deg, #d946ef 0%, #a855f7 100%);
   -webkit-background-clip: text;
@@ -32,6 +36,61 @@ h1, h2, h3, h4, h5, h6 {
   background-clip: text;
 }
 
-.cl-rootBox {
-  width: 100%;
+/* ── Logo icon ── */
+.logo-icon {
+  background: linear-gradient(135deg, #d946ef, #a855f7);
 }
+
+/* ── Animated background blobs ── */
+@keyframes blobDrift1 {
+  0%   { transform: translate(0px, 0px) scale(1);       opacity: 0.55; }
+  25%  { transform: translate(40px, -30px) scale(1.08); opacity: 0.70; }
+  50%  { transform: translate(20px, 40px) scale(0.96);  opacity: 0.50; }
+  75%  { transform: translate(-30px, 20px) scale(1.05); opacity: 0.65; }
+  100% { transform: translate(0px, 0px) scale(1);       opacity: 0.55; }
+}
+@keyframes blobDrift2 {
+  0%   { transform: translate(0px, 0px) scale(1);        opacity: 0.45; }
+  25%  { transform: translate(-50px, 30px) scale(1.06);  opacity: 0.60; }
+  50%  { transform: translate(-20px, -40px) scale(0.94); opacity: 0.40; }
+  75%  { transform: translate(35px, -20px) scale(1.03);  opacity: 0.55; }
+  100% { transform: translate(0px, 0px) scale(1);        opacity: 0.45; }
+}
+
+.blob-fuchsia {
+  width: 720px;
+  height: 480px;
+  background: radial-gradient(ellipse 70% 55% at 50% 50%, rgba(217,70,239,0.18) 0%, rgba(217,70,239,0.06) 55%, transparent 75%);
+  filter: blur(48px);
+  animation: blobDrift1 25s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+.blob-purple {
+  width: 640px;
+  height: 420px;
+  margin-top: 80px;
+  background: radial-gradient(ellipse 65% 50% at 50% 60%, rgba(168,85,247,0.16) 0%, rgba(168,85,247,0.05) 55%, transparent 75%);
+  filter: blur(56px);
+  animation: blobDrift2 30s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+/* ── Role card icon containers ── */
+.icon-fuchsia {
+  background: linear-gradient(135deg, rgba(217,70,239,0.2), rgba(217,70,239,0.05));
+  border: 1px solid rgba(217,70,239,0.2);
+}
+.icon-purple {
+  background: linear-gradient(135deg, rgba(168,85,247,0.2), rgba(168,85,247,0.05));
+  border: 1px solid rgba(168,85,247,0.2);
+}
+
+/* ── Control panel progress animation ── */
+@keyframes slide {
+  0%   { transform: translateX(-100%); }
+  50%  { transform: translateX(200%); }
+  100% { transform: translateX(200%); }
+}
+
+/* ── Clerk ── */
+.cl-rootBox { width: 100%; }

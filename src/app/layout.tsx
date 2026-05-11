@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Raleway, Manrope } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import Toaster from "@/components/Toaster";
 import "./globals.css";
 
 const raleway = Raleway({
@@ -35,6 +36,7 @@ export default function RootLayout({
       >
         <body className="min-h-full flex flex-col bg-lumen-bg text-[#F4F4F5]">
           {children}
+          <Toaster />
         </body>
       </html>
     </ClerkProvider>
