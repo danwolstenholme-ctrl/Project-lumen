@@ -13,23 +13,32 @@ export default async function ArtistDashboardPage() {
 
   const supabase = createAdminClient();
 
-  const [{ data: shows }, { data: userRow }, { data: earningRows }] =
-    await Promise.all([
-      supabase
-        .from("shows")
-        .select("id, title, category, thumbnail_url, status, rejection_reason, featured, created_at")
-        .eq("artist_id", userId)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("users")
-        .select("slug, bio, verified")
-        .eq("clerk_id", userId)
-        .maybeSingle(),
-      supabase
-        .from("earnings")
-        .select("show_id, artist_share, status, created_at")
-        .eq("artist_id", userId),
-    ]);
+  const [
+    { data: shows },
+    { data: userRow },
+    { data: earningRows },
+    { count: artistsCount },
+    { count: venuesCount },
+    { count: publishedPiecesCount },
+  ] = await Promise.all([
+    supabase
+      .from("shows")
+      .select("id, title, category, thumbnail_url, status, rejection_reason, featured, created_at")
+      .eq("artist_id", userId)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("users")
+      .select("slug, bio, verified")
+      .eq("clerk_id", userId)
+      .maybeSingle(),
+    supabase
+      .from("earnings")
+      .select("show_id, artist_share, status, created_at")
+      .eq("artist_id", userId),
+    supabase.from("users").select("*", { count: "exact", head: true }).eq("role", "artist"),
+    supabase.from("users").select("*", { count: "exact", head: true }).eq("role", "venue"),
+    supabase.from("shows").select("*", { count: "exact", head: true }).eq("status", "published"),
+  ]);
 
   // Re-fetch licenses with actual show ids
   const showIds = (shows ?? []).map((s: { id: string }) => s.id);
@@ -70,6 +79,11 @@ export default async function ArtistDashboardPage() {
       slug={userRow?.slug ?? null}
       bio={userRow?.bio ?? null}
       verified={userRow?.verified ?? false}
+      platformStats={{
+        artists: artistsCount ?? 0,
+        venues: venuesCount ?? 0,
+        publishedPieces: publishedPiecesCount ?? 0,
+      }}
     />
   );
 }

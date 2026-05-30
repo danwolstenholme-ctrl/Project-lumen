@@ -5,16 +5,17 @@ import Link from "next/link";
 import {
   Film, Upload, CheckCircle2, Clock, AlertCircle, TrendingUp,
   BadgeCheck, ExternalLink, DollarSign, Store, Pencil, X, Check,
-  Sparkles, BarChart2, XCircle,
+  Sparkles, BarChart2, XCircle, Loader2, RefreshCw,
 } from "lucide-react";
 import { toast } from "@/utils/toast";
+import WelcomePanel from "./WelcomePanel";
 
 interface Show {
   id: string;
   title: string;
   category: string | null;
   thumbnail_url: string | null;
-  status: "draft" | "pending" | "published" | "rejected";
+  status: "draft" | "preparing" | "pending" | "published" | "rejected";
   rejection_reason: string | null;
   featured: boolean | null;
   created_at: string;
@@ -32,13 +33,15 @@ interface ArtistStudioProps {
   slug: string | null;
   bio: string | null;
   verified: boolean;
+  platformStats: { artists: number; venues: number; publishedPieces: number };
 }
 
 const statusConfig = {
-  published: { label: "Published", icon: CheckCircle2, cls: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20" },
-  pending:   { label: "In Review", icon: Clock,         cls: "text-amber-400 bg-amber-400/10 border-amber-400/20" },
-  draft:     { label: "Draft",     icon: AlertCircle,   cls: "text-zinc-500 bg-zinc-400/10 border-zinc-400/20" },
-  rejected:  { label: "Rejected",  icon: XCircle,       cls: "text-red-400 bg-red-400/10 border-red-400/20" },
+  published: { label: "Published",  icon: CheckCircle2, cls: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20", spin: false },
+  pending:   { label: "In Review",  icon: Clock,        cls: "text-amber-400 bg-amber-400/10 border-amber-400/20",       spin: false },
+  preparing: { label: "Processing", icon: Loader2,      cls: "text-sky-400 bg-sky-400/10 border-sky-400/20",              spin: true  },
+  draft:     { label: "Draft",      icon: AlertCircle,  cls: "text-zinc-500 bg-zinc-400/10 border-zinc-400/20",           spin: false },
+  rejected:  { label: "Rejected",   icon: XCircle,      cls: "text-red-400 bg-red-400/10 border-red-400/20",              spin: false },
 };
 
 function fmt(n: number) {
@@ -49,7 +52,9 @@ export default function ArtistStudio({
   shows, licenseCounts, earningsPerShow,
   totalEarnings, monthEarnings, activeVenues,
   userName, userImage, slug, bio: initialBio, verified,
+  platformStats,
 }: ArtistStudioProps) {
+  const isFirstDay = shows.length === 0;
   const [bio, setBio] = useState(initialBio ?? "");
   const [editingBio, setEditingBio] = useState(false);
   const [bioInput, setBioInput] = useState(initialBio ?? "");
@@ -166,6 +171,14 @@ export default function ArtistStudio({
         </Link>
       </div>
 
+      {isFirstDay ? (
+        <WelcomePanel
+          artistName={userName}
+          hasSlug={!!slug}
+          platformStats={platformStats}
+        />
+      ) : (
+        <>
       {/* Stats row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {stats.map(({ label, value, icon: Icon, color }) => (
@@ -237,14 +250,14 @@ export default function ArtistStudio({
                     <span className="font-manrope text-[10px] text-zinc-500 uppercase tracking-widest">{show.category}</span>
                   )}
                   {show.status === "rejected" && show.rejection_reason && (
-                    <p className="font-manrope text-xs text-red-400 mt-0.5 line-clamp-1">
-                      Rejected: {show.rejection_reason}
+                    <p className="font-manrope text-xs text-red-400 mt-0.5 line-clamp-2 leading-snug">
+                      {show.rejection_reason}
                     </p>
                   )}
                 </div>
 
                 <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded border text-[11px] font-manrope font-medium shrink-0 ${cfg.cls}`}>
-                  <StatusIcon className="w-3 h-3" />
+                  <StatusIcon className={`w-3 h-3 ${cfg.spin ? "animate-spin" : ""}`} />
                   {cfg.label}
                 </div>
 
@@ -263,6 +276,15 @@ export default function ArtistStudio({
                     >
                       <Sparkles className="w-3 h-3" />
                       Boost
+                    </Link>
+                  )}
+                  {show.status === "rejected" && (
+                    <Link
+                      href="/dashboard/artist/upload"
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-fuchsia-500/10 border border-fuchsia-500/20 text-fuchsia-500 dark:text-fuchsia-400 text-[11px] font-manrope font-semibold hover:bg-fuchsia-500/20 transition-colors"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      Re-upload
                     </Link>
                   )}
                   <Link
@@ -286,6 +308,8 @@ export default function ArtistStudio({
             );
           })}
         </div>
+      )}
+        </>
       )}
     </div>
   );

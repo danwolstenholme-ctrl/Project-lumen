@@ -6,7 +6,9 @@
 
 ## 1. What Project Lumen Is
 
-**One-line:** A two-sided licensing marketplace where digital artists upload immersive 4K loops, restaurants license them, and an iPad behind the bar projects them onto every dining table.
+**One-line:** A two-sided platform where digital artists upload immersive content ("pieces") — 4K video shows today, with static images / AI-generated work / themed loops on the roadmap — restaurants license them, and an iPad behind the bar projects them onto every dining table.
+
+> **Terminology — Piece vs Show:** As of 2026-05-30, the user-facing word is **"Piece"** across the artist dashboard (broader than just longform shows). The codebase and DB still use **`show`** internally (table name, route paths, types, variables) — no rename, keeps churn down. When you read "shows" in code, that's any artist piece; when you read "Piece" in UI copy, that's what venues will see.
 
 **Tagline:** _Where dining becomes theatre._
 
@@ -35,7 +37,8 @@
 | Framework        | **Next.js 16.2.6 App Router** (React 19, server components default) |
 | Auth             | **Clerk 7** (`@clerk/nextjs`, `publicMetadata.role` for role gating) |
 | Database         | **Supabase** (`@supabase/supabase-js`, `@supabase/ssr`)             |
-| File storage     | Supabase Storage buckets (`shows`, `users`)                         |
+| File storage     | Supabase Storage buckets (`shows` thumbnails, `users` avatars)      |
+| Video ingest + playback | **Mux** Direct Upload + Asset probing + HLS (`@mux/mux-node`, `@mux/mux-player-react`) |
 | Payments         | **Stripe** Checkout + webhooks                                      |
 | Transactional email | **Resend**                                                       |
 | Charts           | **Recharts** (artist earnings)                                      |
@@ -85,7 +88,7 @@ If the docs in `node_modules/next/dist/docs/` describe something differently tha
 ### Artist dashboard
 | Route                              | Purpose                                                          |
 | ---------------------------------- | ---------------------------------------------------------------- |
-| `/dashboard/artist`                | Studio — header card, 4 stat tiles, all shows with status        |
+| `/dashboard/artist`                | Studio — header card, then either the **WelcomePanel** (first-day artists with 0 pieces) or 4 stat tiles + pieces list with status badges |
 | `/dashboard/artist/upload`         | 3-step upload wizard (Details → Media → Confirm)                 |
 | `/dashboard/artist/earnings`       | Bar chart, sortable transaction table, CSV export, payout form   |
 | `/dashboard/artist/boost`          | Stripe boost checkout (Featured/Homepage × 1/3/6 months)         |
@@ -170,7 +173,7 @@ CREATE TABLE users (
 );
 ```
 
-### `shows` (uploaded by artists)
+### `shows` (uploaded by artists — UI calls them "Pieces")
 ```sql
 CREATE TABLE shows (
   id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -180,11 +183,16 @@ CREATE TABLE shows (
   category          TEXT,    -- 'Ocean'|'Fire'|'Abstract'|'Forest'|'Space'|'Seasonal'|'Custom'
   tags              TEXT[],
   thumbnail_url     TEXT,
-  preview_url       TEXT,    -- short 10-30s clip
-  video_url         TEXT,    -- full 4K @ 60fps loop
-  audio_url         TEXT,
-  status            TEXT CHECK (status IN ('draft','pending','published','rejected')),
-  rejection_reason  TEXT,
+  preview_url       TEXT,    -- legacy; future: derive from Mux (animated.gif / sample.mp4)
+  video_url         TEXT,    -- legacy; new uploads use mux_playback_id instead
+  -- Mux columns (added by LUMEN_SCHEMA_002_mux.sql, 2026-05-30):
+  mux_upload_id     TEXT,    -- Mux Direct Upload ID (correlation key during processing)
+  mux_asset_id      TEXT,    -- Mux Asset ID (set on video.upload.asset_created webhook)
+  mux_playback_id   TEXT,    -- Mux playback ID — HLS at https://stream.mux.com/{id}.m3u8
+  mux_status        TEXT,    -- 'waiting' | 'ready' | 'errored'
+  video_metadata    JSONB,   -- {width,height,frame_rate,duration,audio:{channels}}
+  status            TEXT CHECK (status IN ('draft','preparing','pending','published','rejected')),
+  rejection_reason  TEXT,    -- human-readable; populated by Mux validation OR admin
   featured          BOOLEAN DEFAULT false,
   featured_until    TIMESTAMPTZ,
   homepage_featured BOOLEAN DEFAULT false,
@@ -195,7 +203,13 @@ CREATE TABLE shows (
 CREATE INDEX ON shows (artist_id);
 CREATE INDEX ON shows (status);
 CREATE INDEX ON shows (featured);
+CREATE INDEX ON shows (mux_asset_id);    -- webhook correlation
+CREATE INDEX ON shows (mux_upload_id);   -- webhook correlation
 ```
+
+> ⚠️ `audio_url` was **dropped** in LUMEN_SCHEMA_002_mux.sql — audio is now folded into the Mux video asset (single source of truth).
+>
+> **Status enum extension:** `'preparing'` is the new pre-validation state. Lifecycle: `preparing` (Mux is probing) → `pending` (passed Mux validation, awaiting admin review) | `rejected` (failed Mux validation, with specific reasons in `rejection_reason`).
 
 ### `venues` (one per venue user)
 ```sql
@@ -341,8 +355,8 @@ The Lumen Player codebase is **not in this repo**. It's referenced but lives sep
 All under `src/app/api/`. All auth-gated (except `/api/stripe/webhook`).
 
 ### Artist
-- `POST   /api/shows` — submit a show (status defaults to `pending`)
-- `POST   /api/shows/upload-url` — get signed upload URL for `shows` bucket
+- `POST   /api/shows` — submit a piece (status defaults to `preparing`). Also calls Mux at submit time to handle race where asset.ready fired before the row existed.
+- `POST   /api/shows/upload-url` — returns a discriminated response: `{kind:"mux",uploadUrl,uploadId}` for video, `{kind:"supabase",token,storagePath,publicUrl}` for thumbnails
 - `POST   /api/artist/avatar` — multipart upload, 2MB JPG/PNG
 - `PATCH  /api/artist/bio` — one-line bio (max 160 chars)
 - `PATCH  /api/artist/payout` — payout method/email/iban
@@ -360,6 +374,14 @@ All under `src/app/api/`. All auth-gated (except `/api/stripe/webhook`).
 - `POST   /api/boost/checkout` — creates Stripe checkout session for boost
 - `POST   /api/stripe/webhook` — Stripe webhook receiver
   - On `checkout.session.completed` → marks show as `featured=true`, sets `featured_until`, sends Resend email confirmation
+  - **PUBLIC route** (excluded from middleware auth)
+
+### Mux
+- `POST   /api/mux/webhook` — Mux webhook receiver (signature-verified via `mux.webhooks.unwrap`)
+  - `video.upload.asset_created` → links `mux_asset_id` to the show row (correlated via `new_asset_settings.passthrough` = showId)
+  - `video.asset.ready` → calls `applyAssetReady` from `src/utils/muxValidation.ts` — pulls track metadata, runs the spec rules (3840×2160, 60fps ±1%, ≥60s, stereo audio), flips status to `pending` (pass) or `rejected` with specific reasons (fail)
+  - `video.asset.errored` → sets status to `rejected`
+  - Guarded by `WHERE mux_status='waiting'` so Mux retries are idempotent and admin-modified state isn't overwritten
   - **PUBLIC route** (excluded from middleware auth)
 
 ### User
@@ -394,13 +416,19 @@ The pending-payout view exists in `/dashboard/admin` and `/dashboard/artist/earn
 
 ---
 
-## 13. Show submission lifecycle
+## 13. Show (Piece) submission lifecycle
 
-1. Artist hits `/dashboard/artist/upload`, fills 3 steps, hits Submit → `POST /api/shows` with status `pending`.
-2. Files are uploaded via signed URLs to Supabase Storage (thumbnail validated client-side to ≥1920×1080, video to exactly 3840×2160, preview ≤30s).
-3. Admin sees it in `/dashboard/admin/shows`. Approves → status flips to `published`; rejects with reason → status `rejected`, reason shown in artist's studio.
-4. Once `published`, the show appears in the public library and venues can license it.
-5. If artist pays for a Boost via Stripe, the webhook flips `featured=true` and `featured_until=now()+months`. **There is no cron to auto-expire featured flags** — venues will see featured indefinitely until manually unflagged. Build this next.
+1. Artist hits `/dashboard/artist/upload`. Wizard is 3 steps: Details → Media (thumbnail + full piece video-with-audio) → Confirm.
+2. Per file, client requests `/api/shows/upload-url`:
+   - Thumbnail → returns Supabase signed URL → client PUTs to Supabase Storage.
+   - Video → returns **Mux Direct Upload URL** with `passthrough` = client-generated showId → client PUTs file directly to Mux. Mux begins probing + transcoding async.
+3. Artist hits Submit → `POST /api/shows` inserts the row with `status='preparing'`, `mux_upload_id` set. Server also calls `mux.video.uploads.retrieve(uploadId)` inline to catch the race where Mux finished before submit — if asset is already ready, validation runs immediately and status flips on the spot.
+4. Mux finishes processing → `video.upload.asset_created` webhook fires → `/api/mux/webhook` links `mux_asset_id` to the row.
+5. Mux completes probe → `video.asset.ready` webhook → `applyAssetReady` extracts track metadata + runs spec rules (3840×2160, 60fps ±1%, ≥60s, stereo audio) → status flips to `pending` (pass) or `rejected` with specific human-readable reasons (fail).
+6. Admin reviews `pending` pieces in `/dashboard/admin/shows`. Approves → `status='published'`. Rejects with reason → `status='rejected'`. Either way, `rejection_reason` lives on the row.
+7. Once `published`, the piece appears in the public library and venues can license it.
+8. Artist sees the lifecycle in [ArtistStudio.tsx](src/app/dashboard/artist/ArtistStudio.tsx) via status badges: `preparing` (sky-blue, spinning Loader2), `pending` (amber Clock), `published` (emerald CheckCircle2), `rejected` (red XCircle with reason + a Re-upload CTA).
+9. If artist pays for a Boost via Stripe, the webhook flips `featured=true` and `featured_until=now()+months`. **There is no cron to auto-expire featured flags** — venues will see featured indefinitely until manually unflagged. Build this next.
 
 ---
 
@@ -491,6 +519,11 @@ STRIPE_WEBHOOK_SECRET=
 
 # Resend (transactional email)
 RESEND_API_KEY=
+
+# Mux (video ingest + playback)
+MUX_TOKEN_ID=                              # API access token ID
+MUX_TOKEN_SECRET=                          # API access token secret
+MUX_WEBHOOK_SECRET=                        # webhook signing secret (per-endpoint)
 ```
 
 `STRIPE_WEBHOOK_SECRET` is fetched via Stripe CLI or dashboard webhook config. Set the webhook endpoint to `https://<your-domain>/api/stripe/webhook` listening for `checkout.session.completed`.
@@ -579,4 +612,4 @@ If a user asks you to do something on Lumen, ask yourself:
 
 ---
 
-_Last fully refreshed: 2026-05-11. Built across several sessions; see `git log` for commit-level chronology._
+_Last fully refreshed: 2026-05-30 (Mux integration + "Piece" terminology + WelcomePanel). Built across several sessions; see `git log` for commit-level chronology. Strategic next-session plan lives in [LUMEN_NEXT.md](LUMEN_NEXT.md)._
