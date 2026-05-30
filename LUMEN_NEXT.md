@@ -20,7 +20,7 @@ What's shipped, what's blocking testing, and what to tackle next. Read [LUMEN_CO
 
 ## What's blocking full end-to-end on the live site
 
-1. **Push + deploy** — The local `main` branch is two commits ahead of origin. Push, wait for Vercel deploy.
+1. ~~**Push + deploy**~~ — done 2026-05-30. `main` is on `origin/main`, Vercel auto-deployed.
 2. **End-to-end smoke test** on `app.projectlumen.io`:
    - Sign in as artist (zero pieces) → confirm WelcomePanel renders with real stats.
    - Set up profile (slug + bio + avatar) → return to dashboard, step 2 ticks green.
@@ -31,6 +31,16 @@ What's shipped, what's blocking testing, and what to tackle next. Read [LUMEN_CO
 3. **Local-dev webhook** — Mux can't reach localhost. For local testing of the validation flow, tunnel via ngrok / cloudflared. Otherwise local uploads sit at `preparing` forever.
 
 ## Recommended next-session order
+
+> **Note for June:** the first half of June is **operational** — see [PROJECT_LUMEN_HANDOVER.md § 4.3 Migration Sequence](PROJECT_LUMEN_HANDOVER.md) for the account ownership transfer to SRS Dynamic, shared password vault setup, and ISO 27001 baseline work. That work runs in parallel with the technical roadmap below — but if there's a sequencing conflict, **migration wins** (it's contractually required for the prototype hand-off). The technical items below assume migration is being handled in parallel.
+
+### 0. Phase 2 operational work (first half of June)
+- SRS Dynamic creates org-owned accounts (GitHub, Vercel, Supabase, Stripe, etc.)
+- Shared password vault (1Password Business or Bitwarden Teams) provisioned
+- Production accounts transferred week-by-week (Stripe is the priority — payments must legally route into SRS Dynamic's entity)
+- ISO 27001 policy + control documentation drafted
+- Recovery test once migration is complete
+- All tracked against [PROJECT_LUMEN_HANDOVER.md](PROJECT_LUMEN_HANDOVER.md)
 
 ### 1. Plank 5 — Admin review UI with Mux player + spec checklist (~1 day)
 - Replace blind preview in [AdminShows.tsx](src/app/dashboard/admin/shows/AdminShows.tsx) with `@mux/mux-player-react` (already installed) using `mux_playback_id`.
