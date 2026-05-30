@@ -11,6 +11,8 @@
   "dependencies": {
     "@clerk/nextjs": "^7.3.3",
     "@clerk/themes": "^2.4.57",
+    "@mux/mux-node": "^14.1.1",
+    "@mux/mux-player-react": "^3.13.0",
     "@stripe/stripe-js": "^9.4.0",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.105.4",

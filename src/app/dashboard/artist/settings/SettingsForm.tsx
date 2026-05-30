@@ -167,7 +167,7 @@ export default function SettingsForm({
             {notifyOnLicense && <Check className="w-3 h-3 text-white" />}
           </button>
           <div>
-            <p className="font-manrope text-sm text-zinc-900 dark:text-white">Email me when a venue licenses my show</p>
+            <p className="font-manrope text-sm text-zinc-900 dark:text-white">Email me when a venue licenses my piece</p>
             <p className="font-manrope text-xs text-zinc-500 mt-0.5">Sent to your account email address</p>
           </div>
         </label>

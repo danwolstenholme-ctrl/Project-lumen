@@ -77,7 +77,7 @@ export default function EarningsDashboard({
   }
 
   function exportCsv() {
-    const header = "Date,Venue,Show,License Fee,Your Share (70%),Status\n";
+    const header = "Date,Venue,Piece,License Fee,Your Share (70%),Status\n";
     const body = rows.map((r) =>
       `${fmtDate(r.date)},"${r.venueName}","${r.showTitle}",${r.licenseFee.toFixed(2)},${r.artistShare.toFixed(2)},${r.status}`
     ).join("\n");
@@ -194,7 +194,7 @@ export default function EarningsDashboard({
                 {[
                   { key: "date",   label: "Date" },
                   { key: null,     label: "Venue" },
-                  { key: null,     label: "Show" },
+                  { key: null,     label: "Piece" },
                   { key: null,     label: "License Fee" },
                   { key: "amount", label: "Your Share (70%)" },
                   { key: null,     label: "Status" },
@@ -213,7 +213,7 @@ export default function EarningsDashboard({
               {pageRows.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-5 py-12 text-center font-manrope text-sm text-zinc-500">
-                    No earnings yet. Earnings appear when venues license your shows.
+                    No earnings yet. Earnings appear when venues license your pieces.
                   </td>
                 </tr>
               ) : pageRows.map((r) => (

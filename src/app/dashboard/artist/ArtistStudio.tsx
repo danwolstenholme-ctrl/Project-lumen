@@ -77,7 +77,7 @@ export default function ArtistStudio({
   }
 
   const stats = [
-    { label: "Total Shows",    value: shows.length,       icon: Film,       color: "text-fuchsia-400" },
+    { label: "Total Pieces",   value: shows.length,       icon: Film,       color: "text-fuchsia-400" },
     { label: "Total Licenses", value: totalLicenses,      icon: TrendingUp, color: "text-purple-400" },
     { label: "Active Venues",  value: activeVenues,       icon: Store,      color: "text-blue-400" },
     { label: "This Month",     value: fmt(monthEarnings), icon: DollarSign, color: "text-emerald-400" },
@@ -162,7 +162,7 @@ export default function ArtistStudio({
           className="shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white text-sm font-manrope font-semibold shadow-lg shadow-fuchsia-950/40 transition-all"
         >
           <Upload className="w-4 h-4" />
-          Upload Show
+          Upload
         </Link>
       </div>
 
@@ -183,7 +183,7 @@ export default function ArtistStudio({
 
       {/* Shows list */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-raleway text-base font-semibold text-zinc-900 dark:text-white">Your Shows</h2>
+        <h2 className="font-raleway text-base font-semibold text-zinc-900 dark:text-white">Your Pieces</h2>
       </div>
 
       {shows.length === 0 ? (
@@ -192,9 +192,9 @@ export default function ArtistStudio({
             <Film className="w-7 h-7 text-zinc-400 dark:text-zinc-600" />
           </div>
           <div>
-            <p className="font-raleway text-zinc-900 dark:text-white font-semibold text-lg">No shows yet</p>
+            <p className="font-raleway text-zinc-900 dark:text-white font-semibold text-lg">No pieces yet</p>
             <p className="font-manrope text-sm text-zinc-500 mt-1 max-w-xs">
-              Upload your first immersive show and start licensing to venues worldwide.
+              Upload your first piece and start licensing to venues worldwide.
             </p>
           </div>
           <Link
@@ -202,7 +202,7 @@ export default function ArtistStudio({
             className="mt-2 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white text-sm font-manrope font-semibold shadow-lg shadow-fuchsia-950/40 hover:from-fuchsia-500 hover:to-purple-500 transition-all"
           >
             <Upload className="w-4 h-4" />
-            Upload your first show
+            Upload your first piece
           </Link>
         </div>
       ) : (

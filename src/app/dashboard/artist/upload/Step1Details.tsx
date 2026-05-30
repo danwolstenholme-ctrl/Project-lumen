@@ -50,7 +50,7 @@ export default function Step1Details({ details, onChange, onNext }: Step1Details
       {/* Title */}
       <div className="flex flex-col gap-2">
         <label className="font-manrope text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Show Title <span className="text-red-400">*</span>
+          Piece Title <span className="text-red-400">*</span>
         </label>
         <input
           type="text"
@@ -58,7 +58,7 @@ export default function Step1Details({ details, onChange, onNext }: Step1Details
           onChange={(e) => onChange({ title: e.target.value })}
           placeholder="e.g. Abyssal Tide"
           maxLength={100}
-          aria-label="Show title"
+          aria-label="Piece title"
           className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white font-manrope text-sm placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors"
         />
       </div>
@@ -74,9 +74,9 @@ export default function Step1Details({ details, onChange, onNext }: Step1Details
         <textarea
           value={details.description}
           onChange={(e) => onChange({ description: e.target.value.slice(0, MAX_DESC) })}
-          placeholder="Describe the atmosphere, mood, and visual journey of your show…"
+          placeholder="Describe the atmosphere, mood, and visual journey of your piece…"
           rows={4}
-          aria-label="Show description"
+          aria-label="Piece description"
           className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white font-manrope text-sm placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors resize-none leading-relaxed"
         />
       </div>

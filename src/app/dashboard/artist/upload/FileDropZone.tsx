@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Upload, CheckCircle2, AlertCircle, Loader2, X, FileVideo, FileAudio, ImageIcon } from "lucide-react";
+import { Upload, CheckCircle2, AlertCircle, Loader2, X, FileVideo, ImageIcon } from "lucide-react";
 import type { FileKey } from "./uploadHelpers";
 import { formatBytes } from "./uploadHelpers";
 
@@ -100,9 +100,9 @@ export default function FileDropZone({
         {!isActive && !isDone && (
           <div className="flex items-center gap-4 px-5 py-4">
             <div className="w-10 h-10 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center shrink-0">
-              {fileKey === "thumbnail" ? <ImageIcon className="w-5 h-5 text-zinc-500 dark:text-zinc-400" /> :
-               fileKey === "audio" ? <FileAudio className="w-5 h-5 text-zinc-500 dark:text-zinc-400" /> :
-               <FileVideo className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />}
+              {fileKey === "thumbnail"
+                ? <ImageIcon className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />
+                : <FileVideo className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />}
             </div>
             <div className="flex flex-col gap-0.5 min-w-0">
               <p className="font-manrope text-sm text-zinc-700 dark:text-zinc-300">

@@ -7,7 +7,7 @@ import { toast } from "@/app/dashboard/venue/toast";
 import type { Details } from "./Step1Details";
 import type { Uploads } from "./Step2Media";
 import type { FileKey } from "./uploadHelpers";
-import { validate, uploadWithProgress } from "./uploadHelpers";
+import { validate, uploadToSupabase, uploadToMux } from "./uploadHelpers";
 import { defaultUploadState } from "./FileDropZone";
 import Step1Details from "./Step1Details";
 import Step2Media from "./Step2Media";
@@ -15,7 +15,7 @@ import Step3Confirm from "./Step3Confirm";
 import SpecPanel from "./SpecPanel";
 
 const STEPS = [
-  { n: 1, label: "Show Details" },
+  { n: 1, label: "Piece Details" },
   { n: 2, label: "Media Upload" },
   { n: 3, label: "Confirm & Submit" },
 ];
@@ -31,6 +31,7 @@ export default function UploadStudio({}: UploadStudioProps) {
   const [showId] = useState(() => crypto.randomUUID());
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
+  const [muxUploadId, setMuxUploadId] = useState<string | null>(null);
 
   const [details, setDetails] = useState<Details>({
     title: "", description: "", category: "", tags: [],
@@ -38,9 +39,7 @@ export default function UploadStudio({}: UploadStudioProps) {
 
   const [uploads, setUploads] = useState<Uploads>({
     thumbnail: { ...defaultUploadState },
-    preview: { ...defaultUploadState },
     video: { ...defaultUploadState },
-    audio: { ...defaultUploadState },
   });
 
   function setUpload(key: FileKey, patch: Partial<Uploads[FileKey]>) {
@@ -60,9 +59,7 @@ export default function UploadStudio({}: UploadStudioProps) {
       return;
     }
 
-    const localPreview = (key === "thumbnail" || key === "preview")
-      ? URL.createObjectURL(file)
-      : null;
+    const localPreview = key === "thumbnail" ? URL.createObjectURL(file) : null;
 
     setUpload(key, { status: "uploading", progress: 0, localPreview });
 
@@ -77,14 +74,21 @@ export default function UploadStudio({}: UploadStudioProps) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error ?? "Failed to get upload URL");
       }
-      const { token, storagePath, publicUrl } = await res.json();
+      const data = await res.json();
 
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-      await uploadWithProgress(supabaseUrl, storagePath, token, file, (pct) => {
-        setUpload(key, { progress: pct });
-      });
-
-      setUpload(key, { status: "done", url: publicUrl, progress: 100 });
+      if (data.kind === "mux") {
+        await uploadToMux(data.uploadUrl, file, (pct) => {
+          setUpload(key, { progress: pct });
+        });
+        setMuxUploadId(data.uploadId);
+        setUpload(key, { status: "done", url: data.uploadId, progress: 100 });
+      } else {
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+        await uploadToSupabase(supabaseUrl, data.storagePath, data.token, file, (pct) => {
+          setUpload(key, { progress: pct });
+        });
+        setUpload(key, { status: "done", url: data.publicUrl, progress: 100 });
+      }
     } catch (err: unknown) {
       setUpload(key, { status: "error", error: (err as Error).message });
     }
@@ -93,6 +97,7 @@ export default function UploadStudio({}: UploadStudioProps) {
   function handleClear(key: FileKey) {
     const prev = uploads[key].localPreview;
     if (prev) URL.revokeObjectURL(prev);
+    if (key === "video") setMuxUploadId(null);
     setUpload(key, { ...defaultUploadState });
   }
 
@@ -109,16 +114,14 @@ export default function UploadStudio({}: UploadStudioProps) {
           category: details.category || null,
           tags: details.tags,
           thumbnailUrl: uploads.thumbnail.url,
-          previewUrl: uploads.preview.url,
-          videoUrl: uploads.video.url,
-          audioUrl: uploads.audio.url,
+          muxUploadId,
         }),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error ?? "Submission failed");
       }
-      toast.success("Your show has been submitted for review");
+      toast.success("Your piece is uploading — we'll email you once it's validated.");
       router.replace("/dashboard/artist");
     } catch (err: unknown) {
       toast.error((err as Error).message);
@@ -132,7 +135,7 @@ export default function UploadStudio({}: UploadStudioProps) {
       <div className="flex-1 py-10 px-10 xl:px-14 overflow-y-auto">
         <div className="mb-8">
           <h1 className="font-raleway text-2xl font-semibold text-zinc-900 dark:text-white tracking-tight">
-            Upload a Show
+            Upload a Piece
           </h1>
           <p className="font-manrope text-sm text-zinc-600 dark:text-zinc-400 mt-1">
             Submit your immersive projection content for venue licensing.

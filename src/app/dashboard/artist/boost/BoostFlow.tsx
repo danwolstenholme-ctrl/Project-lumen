@@ -17,16 +17,16 @@ type PlacementType = "featured_show" | "homepage_feature";
 const PLACEMENTS: { type: PlacementType; label: string; price: number; desc: string; icon: React.ElementType }[] = [
   {
     type: "featured_show",
-    label: "Featured Show",
+    label: "Featured Piece",
     price: 75,
-    desc: "Your show appears at the top of every venue's show library with a Featured badge.",
+    desc: "Your piece appears at the top of every venue's library with a Featured badge.",
     icon: Sparkles,
   },
   {
     type: "homepage_feature",
     label: "Homepage Feature",
     price: 150,
-    desc: "Your show appears in the Featured Experiences section on the Project Lumen marketing homepage.",
+    desc: "Your piece appears in the Featured Experiences section on the Project Lumen marketing homepage.",
     icon: Globe,
   },
 ];
@@ -51,7 +51,7 @@ export default function BoostFlow({ shows, preselectedShowId, success }: Props) 
           <Check className="w-10 h-10 text-fuchsia-400" />
         </div>
         <div>
-          <h1 className="font-raleway text-2xl font-semibold text-zinc-900 dark:text-white">Your show is now featured.</h1>
+          <h1 className="font-raleway text-2xl font-semibold text-zinc-900 dark:text-white">Your piece is now featured.</h1>
           <p className="font-manrope text-sm text-zinc-600 dark:text-zinc-400 mt-2 max-w-sm">
             Venues will see it at the top of their library. You&apos;ll receive a confirmation email shortly.
           </p>
@@ -94,8 +94,8 @@ export default function BoostFlow({ shows, preselectedShowId, success }: Props) 
         <Link href="/dashboard/artist" className="inline-flex items-center gap-1.5 text-sm font-manrope text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors mb-4">
           <ArrowLeft className="w-4 h-4" /> Back to Studio
         </Link>
-        <h1 className="font-raleway text-2xl font-semibold text-zinc-900 dark:text-white">Boost Your Show</h1>
-        <p className="font-manrope text-sm text-zinc-600 dark:text-zinc-400 mt-1">Get featured placement in the venue show library.</p>
+        <h1 className="font-raleway text-2xl font-semibold text-zinc-900 dark:text-white">Boost Your Piece</h1>
+        <p className="font-manrope text-sm text-zinc-600 dark:text-zinc-400 mt-1">Get featured placement in the venue library.</p>
       </div>
 
       {/* Step indicators */}
@@ -146,7 +146,7 @@ export default function BoostFlow({ shows, preselectedShowId, success }: Props) 
           {/* Show selector */}
           {placement && (
             <div className="flex flex-col gap-2 mt-2">
-              <p className="font-manrope text-xs text-zinc-500 uppercase tracking-widest">Select show to boost</p>
+              <p className="font-manrope text-xs text-zinc-500 uppercase tracking-widest">Select piece to boost</p>
               <div className="flex flex-col gap-2">
                 {shows.map((show) => (
                   <button

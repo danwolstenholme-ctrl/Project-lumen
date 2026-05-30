@@ -24,9 +24,9 @@ const venueNav: NavItem[] = [
 
 const artistNav: NavItem[] = [
   { href: "/dashboard/artist", label: "Studio", icon: LayoutGrid },
-  { href: "/dashboard/artist/upload", label: "Upload Show", icon: BookOpen },
+  { href: "/dashboard/artist/upload", label: "Upload", icon: BookOpen },
   { href: "/dashboard/artist/earnings", label: "Earnings", icon: DollarSign },
-  { href: "/dashboard/artist/boost", label: "Boost Show", icon: Sparkles },
+  { href: "/dashboard/artist/boost", label: "Boost", icon: Sparkles },
   { href: "/dashboard/artist/settings", label: "Settings", icon: Settings },
 ];
 

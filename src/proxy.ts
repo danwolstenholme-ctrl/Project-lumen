@@ -9,6 +9,7 @@ const isPublicRoute = createRouteMatcher([
   "/artists/(.*)",
   "/shows/(.*)",
   "/api/stripe/webhook",
+  "/api/mux/webhook",
 ]);
 
 export const proxy = clerkMiddleware(async (auth, request: NextRequest) => {

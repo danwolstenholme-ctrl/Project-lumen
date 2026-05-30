@@ -1,4 +1,4 @@
-export type FileKey = "thumbnail" | "preview" | "video" | "audio";
+export type FileKey = "thumbnail" | "video";
 
 export async function validateThumbnail(file: File): Promise<void> {
   if (!["image/jpeg", "image/png"].includes(file.type)) {
@@ -24,33 +24,15 @@ export async function validateThumbnail(file: File): Promise<void> {
   });
 }
 
-export async function validatePreviewClip(file: File): Promise<void> {
-  if (!file.name.toLowerCase().endsWith(".mp4")) {
-    throw new Error("Preview clip must be an .mp4 file.");
-  }
-  await new Promise<void>((resolve, reject) => {
-    const video = document.createElement("video");
-    const url = URL.createObjectURL(file);
-    video.onloadedmetadata = () => {
-      URL.revokeObjectURL(url);
-      if (video.duration > 30) {
-        reject(new Error(`Preview clip must be 30 seconds or less. Duration detected: ${Math.round(video.duration)}s.`));
-      } else {
-        resolve();
-      }
-    };
-    video.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Cannot read video file.")); };
-    video.src = url;
-  });
-}
-
 export async function validateShowVideo(file: File): Promise<void> {
   if (!file.name.toLowerCase().endsWith(".mp4")) {
-    throw new Error("Show video must be an .mp4 file (H.264 or H.265).");
+    throw new Error("Your piece must be an .mp4 file (H.264 or H.265).");
   }
   if (file.size > 4 * 1024 * 1024 * 1024) {
-    throw new Error("Show video must be 4GB or less.");
+    throw new Error("Your piece must be 4GB or less.");
   }
+  // Browser-side resolution pre-check — Mux runs the authoritative validation
+  // server-side once the file lands, including framerate, codec, and duration.
   await new Promise<void>((resolve, reject) => {
     const video = document.createElement("video");
     const url = URL.createObjectURL(file);
@@ -73,21 +55,12 @@ export async function validateShowVideo(file: File): Promise<void> {
   });
 }
 
-export function validateAudio(file: File): void {
-  const name = file.name.toLowerCase();
-  if (!name.endsWith(".wav") && !name.endsWith(".aac") && !name.endsWith(".m4a")) {
-    throw new Error("Audio must be a WAV or AAC (.wav / .aac / .m4a) file.");
-  }
-}
-
 export async function validate(key: FileKey, file: File): Promise<void> {
   if (key === "thumbnail") return validateThumbnail(file);
-  if (key === "preview") return validatePreviewClip(file);
   if (key === "video") return validateShowVideo(file);
-  if (key === "audio") { validateAudio(file); return; }
 }
 
-export function uploadWithProgress(
+export function uploadToSupabase(
   supabaseUrl: string,
   storagePath: string,
   token: string,
@@ -121,6 +94,27 @@ export function uploadWithProgress(
     };
     xhr.onerror = () => reject(new Error("Network error during upload."));
     xhr.send(formData);
+  });
+}
+
+export function uploadToMux(
+  uploadUrl: string,
+  file: File,
+  onProgress: (pct: number) => void
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("PUT", uploadUrl);
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) resolve();
+      else reject(new Error(`Upload to Mux failed (${xhr.status})`));
+    };
+    xhr.onerror = () => reject(new Error("Network error during upload to Mux."));
+    xhr.send(file);
   });
 }
 

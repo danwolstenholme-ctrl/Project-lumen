@@ -26,11 +26,11 @@ export default function Step2Media({ uploads, onFileSelect, onClear, onNext, onB
 
   return (
     <div className="flex flex-col gap-7">
-      {/* 60fps notice */}
+      {/* Spec notice */}
       <div className="flex items-start gap-3 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40">
         <Info className="w-4 h-4 text-zinc-400 dark:text-zinc-500 shrink-0 mt-0.5" />
         <p className="font-manrope text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-          <span className="text-zinc-800 dark:text-zinc-300 font-medium">Frame rate cannot be verified automatically.</span> Please confirm your export is set to exactly 60fps before uploading. Shows encoded at lower frame rates will be rejected during review.
+          <span className="text-zinc-800 dark:text-zinc-300 font-medium">Spec is verified server-side.</span> After you submit, your file is checked for resolution, framerate, codec, duration, and audio. We&apos;ll email you the moment validation passes — or what to fix if it doesn&apos;t.
         </p>
       </div>
 
@@ -46,42 +46,20 @@ export default function Step2Media({ uploads, onFileSelect, onClear, onNext, onB
         previewType="image"
       />
 
-      <FileDropZone
-        fileKey="preview"
-        label="Preview Clip"
-        accept="video/mp4,.mp4"
-        hint=".mp4 · max 30 seconds · optional"
-        state={uploads.preview}
-        onFileSelect={onFileSelect}
-        onClear={onClear}
-        showPreview
-        previewType="video"
-      />
-
       <div className="flex flex-col gap-1">
         <FileDropZone
           fileKey="video"
-          label="Full Show Video *"
+          label="Full Piece (Video + Audio) *"
           accept="video/mp4,.mp4"
-          hint=".mp4 (H.264 or H.265) · 3840×2160 · 60fps · max 4GB"
+          hint=".mp4 (H.264 or H.265) · 3840×2160 · 60fps · stereo 48kHz audio · max 4GB"
           state={uploads.video}
           onFileSelect={onFileSelect}
           onClear={onClear}
         />
         <p className="font-manrope text-[11px] text-zinc-400 dark:text-zinc-600 px-1">
-          Resolution is validated automatically. Your video must be exactly 3840×2160px.
+          Encode audio directly into your .mp4 (Stereo, AAC, 48kHz). Mux validates everything server-side once uploaded.
         </p>
       </div>
-
-      <FileDropZone
-        fileKey="audio"
-        label="Audio File"
-        accept=".wav,.aac,.m4a,audio/wav,audio/aac,audio/mp4"
-        hint="WAV or AAC · Stereo · 48kHz · optional"
-        state={uploads.audio}
-        onFileSelect={onFileSelect}
-        onClear={onClear}
-      />
 
       {/* Navigation */}
       <div className="flex items-center justify-between pt-2">

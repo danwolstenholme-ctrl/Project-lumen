@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, CheckCircle2, Loader2, FileVideo, FileAudio, ImageIcon, Film } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Loader2, FileVideo, ImageIcon } from "lucide-react";
 import type { Details } from "./Step1Details";
 import type { Uploads } from "./Step2Media";
 import type { FileKey } from "./uploadHelpers";
@@ -16,10 +16,8 @@ interface Step3ConfirmProps {
 }
 
 const fileLabels: Record<FileKey, { label: string; icon: React.ElementType; required: boolean }> = {
-  thumbnail: { label: "Thumbnail Image", icon: ImageIcon, required: true },
-  preview:   { label: "Preview Clip",    icon: Film,       required: false },
-  video:     { label: "Full Show Video", icon: FileVideo,  required: true },
-  audio:     { label: "Audio File",      icon: FileAudio,  required: false },
+  thumbnail: { label: "Thumbnail Image",         icon: ImageIcon, required: true },
+  video:     { label: "Full Piece (Video + Audio)", icon: FileVideo, required: true },
 };
 
 export default function Step3Confirm({ details, uploads, onSubmit, onBack, submitting }: Step3ConfirmProps) {
@@ -32,7 +30,7 @@ export default function Step3Confirm({ details, uploads, onSubmit, onBack, submi
       {/* Show details summary */}
       <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 overflow-hidden">
         <div className="px-5 py-3 border-b border-zinc-200 dark:border-zinc-800">
-          <p className="font-manrope text-xs text-zinc-500 uppercase tracking-widest font-medium">Show Details</p>
+          <p className="font-manrope text-xs text-zinc-500 uppercase tracking-widest font-medium">Piece Details</p>
         </div>
         <div className="px-5 py-4 flex flex-col gap-3">
           <div>
@@ -76,7 +74,6 @@ export default function Step3Confirm({ details, uploads, onSubmit, onBack, submi
                   <p className={`font-manrope text-sm font-medium ${uploaded ? "text-zinc-800 dark:text-zinc-200" : "text-zinc-400 dark:text-zinc-500"}`}>
                     {label}
                     {required && !uploaded && <span className="text-red-400 ml-1">*</span>}
-                    {!required && !uploaded && <span className="text-zinc-400 ml-1 text-xs font-normal">optional</span>}
                   </p>
                   {uploaded && state.file && (
                     <p className="font-manrope text-[11px] text-zinc-500 truncate">
@@ -108,14 +105,14 @@ export default function Step3Confirm({ details, uploads, onSubmit, onBack, submi
             id: "spec",
             checked: checkedSpec,
             set: setCheckedSpec,
-            label: "I confirm this content meets the Project Lumen technical specification (3840×2160, 60fps, seamless loop, sRGB).",
+            label: "I confirm this content meets the Project Lumen technical specification (3840×2160, 60fps, seamless loop, sRGB, stereo 48kHz audio).",
           },
         ].map(({ id, checked, set, label }) => (
           <label key={id} className="flex items-start gap-3 cursor-pointer group">
             <button
               type="button"
               role="checkbox"
-              aria-checked={checked}
+              aria-checked={checked ? "true" : "false"}
               aria-label={label}
               onClick={() => set(!checked)}
               className={`w-5 h-5 mt-0.5 rounded border flex items-center justify-center shrink-0 transition-all ${
