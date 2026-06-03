@@ -31,7 +31,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html
         lang="en"
-        className={`${raleway.variable} ${manrope.variable} h-full antialiased dark`}
+        className={`${raleway.variable} ${manrope.variable} h-full antialiased`}
         suppressHydrationWarning
       >
         {/* Inline script prevents flash-of-wrong-theme before React hydrates */}
