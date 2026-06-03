@@ -1,0 +1,28 @@
+[Unit]
+Description=Lumen Player
+Documentation=https://github.com/danwolstenholme-ctrl/Project-lumen/tree/main/lumen-player
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=lumen
+Group=lumen
+SupplementaryGroups=video render
+WorkingDirectory=/opt/lumen-player
+EnvironmentFile=/etc/lumen-player/env
+ExecStart=/opt/lumen-player/.venv/bin/python -m lumen_player
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+# Hardening — limit blast radius if the player is ever compromised.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/tmp
+PrivateTmp=false
+
+[Install]
+WantedBy=multi-user.target
