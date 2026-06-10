@@ -1,16 +1,22 @@
 # Lumen Player
 
-On-table software for Project Lumen. Runs on a Raspberry Pi 5 attached to a 4K projector (or monitor during prototyping), listens for control commands from the Lumen iPad app over WebSocket, and plays HLS video full-screen via mpv.
+On-table software for Project Lumen. Runs on a Raspberry Pi 5 attached to a 4K projector (or monitor during prototyping), receives control commands from the Lumen dashboard via a Supabase Realtime channel (outbound WSS only — works over the open internet), and plays HLS video full-screen via mpv.
 
-See [`LUMEN_HARDWARE_SPEC.md`](../LUMEN_HARDWARE_SPEC.md) in the parent repo for the hardware BOM and the full WebSocket protocol.
+See [`LUMEN_HARDWARE_SPEC.md`](../LUMEN_HARDWARE_SPEC.md) in the parent repo for the hardware BOM and the full command protocol.
 
 ## Architecture
 
 ```
-┌─────────────────┐   WebSocket :8765    ┌─────────────────┐
-│  iPad app       │ ───────────────────► │  Lumen Player   │
-│  (Quick Play)   │   JSON commands      │  (Python)       │
-└─────────────────┘                      └────────┬────────┘
+┌─────────────────┐                      ┌─────────────────┐
+│  iPad dashboard │ ── publish ────────► │  Supabase       │
+│  (Quick Play)   │   table:<id>         │  Realtime       │
+└─────────────────┘   broadcast channel  └────────┬────────┘
+                                                  │ outbound WSS
+                                                  ▼ (Pi subscribes)
+                                          ┌─────────────────┐
+                                          │  Lumen Player   │
+                                          │  (Python)       │
+                                          └────────┬────────┘
                                                   │ JSON IPC
                                                   ▼ Unix socket
                                           ┌─────────────────┐
@@ -23,6 +29,9 @@ See [`LUMEN_HARDWARE_SPEC.md`](../LUMEN_HARDWARE_SPEC.md) in the parent repo for
 
          Pi also POSTs status changes to Supabase REST so the
          iPad dashboard's table chips stay live in real time.
+
+         A LAN WebSocket server (:8765) is kept as a bench-test
+         fallback — same command protocol, useful with wscat.
 ```
 
 ## Project layout
@@ -34,8 +43,9 @@ lumen-player/
 │   ├── config.py                # Env-var parsing
 │   ├── log.py                   # Logging setup
 │   ├── supabase_client.py       # REST client for status + show lookup
+│   ├── realtime.py              # Supabase Realtime subscriber (primary transport)
 │   ├── player.py                # mpv subprocess wrapper (JSON IPC)
-│   └── server.py                # WebSocket server + command dispatch
+│   └── server.py                # Command dispatch + LAN WS server (bench fallback)
 ├── systemd/
 │   └── lumen-player.service     # systemd unit for auto-start on boot
 ├── scripts/
@@ -84,7 +94,7 @@ export TABLE_ID=<a-real-tables-row-uuid>
 python -m lumen_player
 ```
 
-In another terminal, send commands using `wscat`:
+In production, commands arrive via the Supabase Realtime channel `table:<TABLE_ID>` (the dashboard publishes `command` broadcast events). For bench testing without the dashboard, send the same payloads to the local WebSocket fallback using `wscat`:
 
 ```bash
 npm install -g wscat
@@ -100,11 +110,12 @@ wscat -c ws://localhost:8765
 < {"type":"status","state":"idle"}
 ```
 
-## WebSocket protocol
+## Command protocol
 
 Commands use the **`action`** field with a **`timestamp`** key (in ms) — this is what
-the production dashboard (QuickPlay / ControlPanel) sends. The player also accepts
-`type` / `timestamp_ms` as legacy aliases.
+the production dashboard (QuickPlay / ControlPanel) publishes. The player also accepts
+`type` / `timestamp_ms` as legacy aliases. The protocol is transport-independent: the
+same JSON payloads work over the Realtime channel (primary) and the LAN WS fallback.
 
 | Direction | Command | Payload |
 |---|---|---|
@@ -115,10 +126,13 @@ the production dashboard (QuickPlay / ControlPanel) sends. The player also accep
 | iPad → Pi | `volume` | `{action:"volume", value: 0..1}` |
 | iPad → Pi | `brightness` | `{action:"brightness", value: 0..1}` |
 | iPad → Pi | `ping` | `{action:"ping"}` |
-| Pi → iPad | `status` | `{type:"status", state, show_id?}` |
-| Pi → iPad | `pong` | `{type:"pong", ts_ms}` |
-| Pi → iPad | `ok` | `{type:"ok"}` (for fire-and-forget commands) |
-| Pi → iPad | `error` | `{type:"error", message}` |
+| Pi → iPad | `status` | `{type:"status", state, show_id?}` (LAN WS only) |
+| Pi → iPad | `pong` | `{type:"pong", ts_ms}` (LAN WS only) |
+| Pi → iPad | `ok` | `{type:"ok"}` (LAN WS only) |
+| Pi → iPad | `error` | `{type:"error", message}` (LAN WS only) |
+
+Over the Realtime transport there is no reply socket — playback state flows back to
+the dashboard via the Pi's status updates to the Supabase `tables` row instead.
 
 ## Sync model
 

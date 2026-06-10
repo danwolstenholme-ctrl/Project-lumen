@@ -1,4 +1,9 @@
-"""WebSocket server — receives commands from the iPad Quick Play app."""
+"""Command dispatch + local WebSocket server.
+
+Primary command transport is the Supabase Realtime channel (see realtime.py),
+which calls `dispatch()` directly. The LAN WebSocket server is kept as a
+bench-test fallback (wscat / local development).
+"""
 from __future__ import annotations
 
 import asyncio
@@ -38,48 +43,56 @@ class LumenPlayerServer:
                 except json.JSONDecodeError:
                     await ws.send(json.dumps({"type": "error", "message": "invalid json"}))
                     continue
-                await self._dispatch(cmd, ws)
+                await self.dispatch(cmd, ws)
         except websockets.exceptions.ConnectionClosed:
             pass
         finally:
             log.info("client disconnected: %s", peer)
 
-    async def _dispatch(self, cmd: dict[str, Any], ws) -> None:
+    async def dispatch(self, cmd: dict[str, Any], ws=None) -> None:
+        """Execute a command. `ws` is optional — Realtime commands have no
+        reply socket; status flows back via Supabase REST instead."""
+
+        async def reply(msg: dict[str, Any]) -> None:
+            if ws is not None:
+                await ws.send(json.dumps(msg))
+
         # Canonical field is "action" (what the dashboard sends);
         # "type" is accepted as a legacy alias per the original hardware spec.
         ctype = cmd.get("action") or cmd.get("type")
         try:
             if ctype == "play":
-                await self._handle_play(cmd, ws)
+                await self._handle_play(cmd, reply)
             elif ctype == "pause":
                 await self._player.set_pause(True)
-                await ws.send(json.dumps({"type": "status", "state": "paused"}))
+                await reply({"type": "status", "state": "paused"})
             elif ctype == "resume":
                 await self._player.set_pause(False)
-                await ws.send(json.dumps({"type": "status", "state": "playing"}))
+                await reply({"type": "status", "state": "playing"})
             elif ctype == "stop":
                 await self._player.stop_playback()
                 self._current_show_id = None
                 await self._supabase.update_table_status("online_idle")
-                await ws.send(json.dumps({"type": "status", "state": "idle"}))
+                await reply({"type": "status", "state": "idle"})
             elif ctype == "volume":
                 await self._player.set_volume(float(cmd["value"]))
-                await ws.send(json.dumps({"type": "ok"}))
+                await reply({"type": "ok"})
             elif ctype == "brightness":
                 await self._player.set_brightness(float(cmd["value"]))
-                await ws.send(json.dumps({"type": "ok"}))
+                await reply({"type": "ok"})
             elif ctype == "ping":
-                await ws.send(json.dumps({"type": "pong", "ts_ms": int(time.time() * 1000)}))
+                await reply({"type": "pong", "ts_ms": int(time.time() * 1000)})
             else:
-                await ws.send(json.dumps({"type": "error", "message": f"unknown command: {ctype}"}))
+                log.warning("unknown command: %s", ctype)
+                await reply({"type": "error", "message": f"unknown command: {ctype}"})
         except Exception as e:
             log.exception("command failed: %s", ctype)
-            await ws.send(json.dumps({"type": "error", "message": str(e)}))
+            await reply({"type": "error", "message": str(e)})
 
-    async def _handle_play(self, cmd: dict[str, Any], ws) -> None:
+    async def _handle_play(self, cmd: dict[str, Any], reply) -> None:
         show_id = cmd.get("show_id")
         if not show_id:
-            await ws.send(json.dumps({"type": "error", "message": "play missing show_id"}))
+            await reply({"type": "error", "message": "play missing show_id"})
             return
 
         # Canonical field is "timestamp" (what the dashboard sends);
@@ -88,7 +101,7 @@ class LumenPlayerServer:
 
         show = await self._supabase.get_show(show_id)
         if not show or not show.get("mux_playback_id"):
-            await ws.send(json.dumps({"type": "error", "message": "show not playable"}))
+            await reply({"type": "error", "message": "show not playable"})
             return
 
         playback_id = show["mux_playback_id"]
@@ -113,4 +126,4 @@ class LumenPlayerServer:
 
         self._current_show_id = show_id
         await self._supabase.update_table_status("online_playing")
-        await ws.send(json.dumps({"type": "status", "state": "playing", "show_id": show_id}))
+        await reply({"type": "status", "state": "playing", "show_id": show_id})

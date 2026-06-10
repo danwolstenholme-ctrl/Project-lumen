@@ -22,8 +22,8 @@
 
 **The physical product:**
 - Each restaurant has multiple **tables** — each table is a projector pointed straight down at a 160×90cm physical surface, viewed from above by seated diners.
-- Each projector runs the "Lumen player" (a separate desktop/embedded app that listens on `ws://<table-ip>:8765`).
-- The web dashboard sends WebSocket commands to each table's IP to play/pause/stop/set-volume/set-brightness.
+- Each projector runs the "Lumen player" (lives in this repo at `lumen-player/`) which subscribes to its own Supabase Realtime channel (`table:<tables.id>`).
+- The web dashboard publishes commands to each table's Realtime channel to play/pause/stop/set-volume/set-brightness — works over the open internet, no LAN IPs.
 - The killer move: the iPad UI lets staff tap **one button** and every table comes alive at the same instant.
 
 **Why it's expensive to be expensive:** This is not "another art marketplace." Lumen is high-touch hospitality tech. The dashboard's aesthetic, motion, and tactility *is* the product pitch — when a venue manager sees the iPad, they need to feel like they're holding the controls to a Michelin-star room.
@@ -45,7 +45,7 @@
 | Styling          | **Tailwind v4** (class-based dark mode via `@custom-variant`)       |
 | Fonts            | **Raleway** (headings), **Manrope** (body) via `next/font/google`   |
 | Icons            | **lucide-react**                                                    |
-| Realtime         | Supabase Realtime (postgres_changes) + raw browser WebSocket to tables |
+| Realtime         | Supabase Realtime (postgres_changes for status + broadcast channels for table commands) |
 
 **Brand colors:** `#D946EF` (fuchsia), `#A855F7` (purple), `#F59E0B` (amber) on `#09090B` (zinc-950) dark / `#F4F4F5` light.
 
@@ -126,10 +126,10 @@ This is the single most important screen in the whole app. It's what a venue man
 ### Behavior
 - When the user taps "Start the Show":
   1. The current `Date.now()` timestamp is captured.
-  2. A WebSocket is opened to every online table at `ws://<ip>:8765`.
-  3. Each WS receives `{ action: "play", show_id, timestamp }` — the shared timestamp means all projectors start their video at the same wall-clock moment.
+  2. `{ action: "play", show_id, timestamp }` is published to each online table's Supabase Realtime broadcast channel (`table:<tables.id>`, event `command`).
+  3. The shared wall-clock timestamp means all projectors converge on the same frame regardless of delivery latency.
   4. Local state flips: tables marked `online_playing`, hero button morphs to "Stop All".
-- 2-second timeout — if a table doesn't ack, it's marked offline and the user sees a toast.
+- Table liveness comes from the `tables.status` column (the Pi updates it; postgres_changes pushes it back to the dashboard).
 - The "Other shows" row plays any other licensed show instantly across all online tables.
 
 ### Auto-fallbacks
@@ -237,7 +237,7 @@ CREATE TABLE tables (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   venue_id    UUID REFERENCES venues(id) ON DELETE CASCADE,
   label       TEXT NOT NULL,
-  ip_address  TEXT,        -- local IPv4 of the projector, e.g. 192.168.1.50
+  ip_address  TEXT,        -- LEGACY (pre cloud-control); tables are addressed by id via Realtime channels
   status      TEXT CHECK (status IN ('online_playing','online_idle','offline')) DEFAULT 'offline',
   created_at  TIMESTAMPTZ DEFAULT NOW()
 );
@@ -286,11 +286,11 @@ Both public-read; writes via service role key.
 
 ---
 
-## 7. The Lumen Player (projector-side, separate codebase)
+## 7. The Lumen Player (projector-side)
 
-The web dashboard sends commands to each projector via WebSocket. There is a **separate Python/Electron/native app** running on each projector mini-PC that:
+The web dashboard publishes commands to a per-table Supabase Realtime broadcast channel; the Python app on each table's Pi subscribes to its own channel and:
 
-- Listens on `ws://0.0.0.0:8765`.
+- Subscribes to channel `table:<TABLE_ID>` (broadcast event `command`) over outbound WSS — no inbound ports, no static IPs, works behind any venue NAT. A LAN WebSocket server on `:8765` remains as a bench-test fallback.
 - Accepts JSON messages:
   - `{ action: "play", show_id, timestamp }` — fetch the show's `video_url` from Supabase, seek to `(Date.now() - timestamp) % video_duration` for instant sync, loop forever.
   - `{ action: "pause" }`

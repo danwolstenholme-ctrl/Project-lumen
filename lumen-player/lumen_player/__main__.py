@@ -1,4 +1,8 @@
-"""Entry point — `python -m lumen_player`. Boots mpv, starts WS server."""
+"""Entry point — `python -m lumen_player`.
+
+Boots mpv, subscribes to this table's Supabase Realtime command channel
+(primary transport), and starts the LAN WebSocket server (bench fallback).
+"""
 from __future__ import annotations
 
 import asyncio
@@ -8,6 +12,7 @@ import signal
 from . import log as log_setup
 from .config import Config
 from .player import MpvPlayer
+from .realtime import RealtimeSubscriber
 from .server import LumenPlayerServer
 from .supabase_client import SupabaseClient
 
@@ -23,6 +28,12 @@ async def amain() -> None:
 
     await player.start()
     server = LumenPlayerServer(cfg.ws_port, player, supabase)
+    realtime = RealtimeSubscriber(
+        cfg.supabase_url,
+        cfg.supabase_service_key,
+        cfg.table_id,
+        on_command=server.dispatch,
+    )
 
     stop_event = asyncio.Event()
 
@@ -34,15 +45,16 @@ async def amain() -> None:
     for sig in (signal.SIGINT, signal.SIGTERM):
         loop.add_signal_handler(sig, _handle_signal)
 
-    server_task = asyncio.create_task(server.run())
+    tasks = [
+        asyncio.create_task(realtime.run()),
+        asyncio.create_task(server.run()),
+    ]
     try:
         await stop_event.wait()
     finally:
-        server_task.cancel()
-        try:
-            await server_task
-        except asyncio.CancelledError:
-            pass
+        for task in tasks:
+            task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
         log.info("shutting down")
         try:
             await supabase.update_table_status("offline")

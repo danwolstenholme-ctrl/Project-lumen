@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { toast } from "@/app/dashboard/venue/toast";
+import { TableCommandPublisher, type TableCommand } from "@/app/dashboard/venue/realtime";
 import type { Table, Show, Venue, TablePlayMap } from "./types";
 import TableList from "./TableList";
 import ControlShowLibrary from "./ControlShowLibrary";
@@ -25,7 +25,8 @@ export default function ControlPanel({ initialTables, initialShows, venue, venue
   const [volume, setVolume] = useState(80);
   const [brightness, setBrightness] = useState(90);
 
-  const wsRef = useRef<Map<string, WebSocket>>(new Map());
+  const publisherRef = useRef<TableCommandPublisher | null>(null);
+  const getPublisher = () => (publisherRef.current ??= new TableCommandPublisher());
 
   // Supabase realtime — live table status
   useEffect(() => {
@@ -47,8 +48,8 @@ export default function ControlPanel({ initialTables, initialShows, venue, venue
     return () => { client.removeChannel(ch); };
   }, [venueDbId]);
 
-  // Cleanup WS on unmount
-  useEffect(() => () => { wsRef.current.forEach((ws) => ws.close()); }, []);
+  // Cleanup Realtime command channels on unmount
+  useEffect(() => () => { publisherRef.current?.dispose(); }, []);
 
   // ── Table selection ──
   const toggleTable = useCallback((id: string) => {
@@ -66,44 +67,16 @@ export default function ControlPanel({ initialTables, initialShows, venue, venue
     );
   }, [tables]);
 
-  // ── WebSocket helpers ──
-  const connectAndSend = useCallback((table: Table, msg: object) => {
-    if (!table.ip_address) {
-      toast.error(`${table.label} has no IP address configured`);
-      return;
-    }
-    wsRef.current.get(table.id)?.close();
-    const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const ws = new WebSocket(`${proto}//${table.ip_address}:8765`);
-    wsRef.current.set(table.id, ws);
-
-    const timer = setTimeout(() => {
-      if (ws.readyState !== WebSocket.OPEN) {
-        ws.close();
-        setTables((p) => p.map((t) => (t.id === table.id ? { ...t, status: "offline" } : t)));
-        setTablePlayMap((p) => { const n = new Map(p); n.delete(table.id); return n; });
-        toast.error(`${table.label} is not responding. Check network connection.`);
-      }
-    }, 2000);
-
-    ws.onopen = () => { clearTimeout(timer); ws.send(JSON.stringify(msg)); };
-    ws.onerror = () => {
-      clearTimeout(timer);
-      setTables((p) => p.map((t) => (t.id === table.id ? { ...t, status: "offline" } : t)));
-      setTablePlayMap((p) => { const n = new Map(p); n.delete(table.id); return n; });
-      toast.error(`${table.label} is not responding. Check network connection.`);
-    };
-    ws.onclose = () => wsRef.current.delete(table.id);
+  // ── Realtime command helpers ──
+  const sendCommand = useCallback((table: Table, msg: TableCommand) => {
+    void getPublisher().send(table.id, msg);
   }, []);
 
-  const broadcastToSelected = useCallback((msg: object) => {
+  const broadcastToSelected = useCallback((msg: TableCommand) => {
     tables
       .filter((t) => selectedTableIds.has(t.id))
-      .forEach((t) => {
-        const ws = wsRef.current.get(t.id);
-        if (ws?.readyState === WebSocket.OPEN) ws.send(JSON.stringify(msg));
-      });
-  }, [tables, selectedTableIds]);
+      .forEach((t) => sendCommand(t, msg));
+  }, [tables, selectedTableIds, sendCommand]);
 
   // ── Transport controls ──
   const playOnSelected = useCallback((showId: string) => {
@@ -111,12 +84,12 @@ export default function ControlPanel({ initialTables, initialShows, venue, venue
     tables
       .filter((t) => selectedTableIds.has(t.id))
       .forEach((t) => {
-        connectAndSend(t, { action: "play", show_id: showId, timestamp: ts });
+        sendCommand(t, { action: "play", show_id: showId, timestamp: ts });
         setTablePlayMap((p) => new Map(p).set(t.id, { showId, startedAt: ts, paused: false }));
         setTables((p) => p.map((x) => (x.id === t.id ? { ...x, status: "online_playing" } : x)));
       });
     setExpandedShowId(null);
-  }, [tables, selectedTableIds, connectAndSend]);
+  }, [tables, selectedTableIds, sendCommand]);
 
   const pauseSelected = useCallback(() => {
     broadcastToSelected({ action: "pause" });

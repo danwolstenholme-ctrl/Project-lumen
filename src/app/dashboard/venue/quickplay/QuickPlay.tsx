@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { toast } from "@/app/dashboard/venue/toast";
+import { TableCommandPublisher, type TableCommand } from "@/app/dashboard/venue/realtime";
 
 interface Show {
   id: string;
@@ -23,7 +24,6 @@ interface Show {
 interface Table {
   id: string;
   label: string;
-  ip_address: string | null;
   status: "online_playing" | "online_idle" | "offline";
 }
 
@@ -55,7 +55,8 @@ export default function QuickPlay({
   const [savingDefault, setSavingDefault] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const wsRef = useRef<Map<string, WebSocket>>(new Map());
+  const publisherRef = useRef<TableCommandPublisher | null>(null);
+  const getPublisher = () => (publisherRef.current ??= new TableCommandPublisher());
 
   // Live clock
   useEffect(() => {
@@ -81,43 +82,20 @@ export default function QuickPlay({
     return () => { client.removeChannel(ch); };
   }, [venueDbId]);
 
-  // Cleanup websockets
-  useEffect(() => () => { wsRef.current.forEach((ws) => ws.close()); }, []);
+  // Cleanup Realtime command channels
+  useEffect(() => () => { publisherRef.current?.dispose(); }, []);
 
   const onlineTables = tables.filter((t) => t.status !== "offline");
 
-  const connectAndSend = useCallback((table: Table, msg: object) => {
-    if (!table.ip_address) {
-      toast.error(`${table.label} has no IP configured`);
-      return;
-    }
-    wsRef.current.get(table.id)?.close();
-    const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const ws = new WebSocket(`${proto}//${table.ip_address}:8765`);
-    wsRef.current.set(table.id, ws);
-    const timer = setTimeout(() => {
-      if (ws.readyState !== WebSocket.OPEN) {
-        ws.close();
-        setTables((p) => p.map((t) => (t.id === table.id ? { ...t, status: "offline" } : t)));
-      }
-    }, 2000);
-    ws.onopen = () => { clearTimeout(timer); ws.send(JSON.stringify(msg)); };
-    ws.onerror = () => {
-      clearTimeout(timer);
-      setTables((p) => p.map((t) => (t.id === table.id ? { ...t, status: "offline" } : t)));
-    };
-    ws.onclose = () => wsRef.current.delete(table.id);
+  const sendCommand = useCallback((table: Table, msg: TableCommand) => {
+    void getPublisher().send(table.id, msg);
   }, []);
 
-  const broadcast = useCallback((msg: object) => {
+  const broadcast = useCallback((msg: TableCommand) => {
     tables
       .filter((t) => t.status !== "offline")
-      .forEach((t) => {
-        const open = wsRef.current.get(t.id);
-        if (open?.readyState === WebSocket.OPEN) open.send(JSON.stringify(msg));
-        else connectAndSend(t, msg);
-      });
-  }, [tables, connectAndSend]);
+      .forEach((t) => sendCommand(t, msg));
+  }, [tables, sendCommand]);
 
   // ── The one button: play across every online table ──
   const playEverywhere = useCallback((show: Show) => {
@@ -131,13 +109,13 @@ export default function QuickPlay({
       toast.error("No tables online. Check your projector network.");
       return;
     }
-    target.forEach((t) => connectAndSend(t, { action: "play", show_id: show.id, timestamp: ts }));
+    target.forEach((t) => sendCommand(t, { action: "play", show_id: show.id, timestamp: ts }));
     setTables((prev) =>
       prev.map((t) => (target.some((x) => x.id === t.id) ? { ...t, status: "online_playing" } : t))
     );
     setPlayingShowId(show.id);
     toast.success(`Now playing ${show.title} on ${target.length} ${target.length === 1 ? "table" : "tables"}`);
-  }, [tables, connectAndSend]);
+  }, [tables, sendCommand]);
 
   const stopEverywhere = useCallback(() => {
     broadcast({ action: "stop" });
