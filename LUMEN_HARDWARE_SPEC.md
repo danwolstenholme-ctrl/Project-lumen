@@ -81,7 +81,7 @@ Production-grade choices for the prototype. Specific SKUs given where they matte
 
 | Item | Specific product | Quantity | ~Cost (£) | Notes |
 |---|---|---|---|---|
-| Single-board computer | **Raspberry Pi 5 (8GB)** | 1 | 80 | 8GB variant only — 4GB is too tight for 4K HLS buffering. Hardware H.265 decode at 4K@60fps. |
+| Single-board computer | **Raspberry Pi 5 (8GB)** | 1 | 80 | 8GB variant only — 4GB is too tight for 4K HLS buffering. Hardware **H.265/HEVC** decode at 4K@60fps. ⚠️ The Pi 5 has **no H.264 hardware decoder** — see risk #8: Mux's HLS renditions are H.264, which must be software-decoded. |
 | Storage | SanDisk Extreme microSDXC 64GB A2 V30 | 1 | 15 | A2 rating mandatory for IOPS during boot + journal writes |
 | Power supply | Official Raspberry Pi 27W USB-C PSU | 1 | 12 | Pi 5 needs 5V @ 5A — generic USB-C bricks will undervolt and degrade performance |
 | Case | **Argon NEO 5** (passive heatsink) | 1 | 25 | Fanless for restaurant ambient-noise. Aluminium body acts as the heatsink. |
@@ -127,7 +127,7 @@ Audio is **out of scope for the prototype** per the architectural decision recor
 | Scenario | ~Cost (£) |
 |---|---|
 | **Stage 1 prototype** (Pi 5 + 4K monitor) | **~420** |
-| **Stage 2 prototype** (Pi 5 + BenQ projector + stand) | **~1,580** |
+| **Stage 2 prototype** (Pi 5 + BenQ projector + stand + mount) | **~1,680** |
 | **Production estimate per table** (compute + production-grade short-throw 4K projector + ceiling mount + integration) | **~£4,000–7,000** (subject to projector selection in Phase 3) |
 
 ---
@@ -225,17 +225,17 @@ The whole "every table starts the same show at the same instant" effect hinges o
 const startAt = Date.now();
 tables.forEach(t => {
   ws[t.id].send(JSON.stringify({
-    type: "play",
+    action: "play",
     show_id: currentShow.id,
-    timestamp_ms: startAt,
+    timestamp: startAt,
   }));
 });
 ```
 
-**At Pi-side (to be implemented in Lumen Player):**
+**At Pi-side (implemented in `lumen-player/lumen_player/server.py`):**
 
 ```python
-elapsed_ms = (now_ms() - timestamp_ms) % video_duration_ms
+elapsed_ms = (now_ms() - timestamp) % video_duration_ms
 mpv.command("loadfile", hls_url, "replace", { "start": elapsed_ms / 1000 })
 ```
 
@@ -269,7 +269,7 @@ For the Stage 1 prototype, the Lumen Player only needs to handle:
 
 Volume, brightness, pause/resume, error reporting can land in Stage 2+.
 
-Estimated build time: **2–3 days of focused work** for the MVP, in a separate `lumen-player` git repository (kept apart from the web app per [LUMEN_CONTEXT.md § 7](LUMEN_CONTEXT.md)).
+**Status (2026-06-10):** the player is built and lives at `lumen-player/` in this repo. The full MVP scope above is implemented, *plus* volume/brightness/pause/resume. Remaining before Stage 1 sign-off: 5s status heartbeat while playing, and the mixed-content/TLS resolution (risk #9).
 
 ---
 
@@ -283,13 +283,13 @@ Estimated build time: **2–3 days of focused work** for the MVP, in a separate 
 |---|---|---|
 | Order Stage 1 BOM (Pi 5, accessories, microSD, monitor) | Wolsten Studios | 0 (next-day delivery) |
 | Flash Raspberry Pi OS Lite (64-bit) to microSD, boot Pi, connect to LAN, get IP | Wolsten Studios | 0.5 |
-| Create new `lumen-player` git repo. Scaffold Python project with `websockets`, `httpx`, mpv install | Wolsten Studios | 0.5 |
-| Build Lumen Player MVP (play + stop + status + systemd) | Wolsten Studios | 2 |
+| Deploy Lumen Player from `lumen-player/` (already built — see § 5.6) via `scripts/install.sh` + systemd unit | Wolsten Studios | 0.5 |
+| Bench-test playback: measure 4K H.264 software-decode performance and Pi temps (risk #8 decision gate) | Wolsten Studios | 1 |
 | Insert a `tables` row in Supabase with the Pi's IP. Configure Pi to use the same env credentials (read-only via service role) | Wolsten Studios | 0.5 |
 | End-to-end test: from `app.projectlumen.io/dashboard/venue/quickplay`, hit "Start the Show" → confirm video plays full-screen on the Pi monitor | Wolsten Studios | 0.5 |
 | **Milestone: Stage 1 complete** | Both | — |
 
-### Stage 2 — Projection validation (target: +£1,160, 1 week)
+### Stage 2 — Projection validation (target: +£1,600, 1 week)
 
 **Goal:** see what a Lumen piece actually looks like projected on a 160×90cm surface from 1.6m height.
 
@@ -315,6 +315,8 @@ Estimated build time: **2–3 days of focused work** for the MVP, in a separate 
 | 5 | ~~Lumen Player not yet built.~~ **Resolved:** player implemented at `lumen-player/` (~80% complete). Remaining gaps: status heartbeat, TLS for `wss:` from HTTPS dashboards. | Finish remaining gaps during Stage 1 bench testing. |
 | 6 | **Supabase service key on Pi.** Each Pi would need a service-role key to update its `tables.status` — sharing that key with field devices is a security concern. | Phase 2/3: replace with a dedicated low-privilege Supabase JWT minted per table, or proxy status updates through the Lumen app server. Out of scope for prototype. |
 | 7 | **Projector lifespan & cost-per-hour.** BenQ TK700STi lamp life is ~4,000 hours at high brightness — ~3 years of dinner service. Replacement lamps £200. Production projector spec should favour laser engines for longer life. | Document in production hardware decision. |
+| 8 | **Codec mismatch: Pi 5 has no H.264 hardware decoder, and Mux's standard HLS renditions are H.264.** The Pi 5 only hardware-decodes H.265/HEVC. Software-decoding 4K@60 H.264 on the Pi 5's CPU is at/beyond its limit — expect dropped frames and thermal throttling. | Stage 1 bench test must measure this explicitly. Options if it fails: (a) cap playback at Mux's 1080p rendition (likely fine for a 160×90cm surface viewed at arm's length — projector is the bottleneck anyway), (b) pre-download an H.265 master per show to local storage and loop from disk (also removes internet dependency during service), (c) move to an Intel N100-class mini-PC (~£150) with full H.264/H.265 hardware decode. Decision gate at end of Stage 1. |
+| 9 | **Mixed-content block: HTTPS dashboard → `ws://` table.** Browsers block insecure WebSocket connections from HTTPS pages. The production dashboard at `app.projectlumen.io` is HTTPS, so the iPad's browser will refuse `ws://<table-ip>:8765`, and `wss://` requires a TLS cert the Pi doesn't have. | Stage 1: test from a local HTTP dev build, or use Safari's per-site insecure-content allowance. Production options: local reverse proxy with venue-domain cert on each Pi, or a packaged iPad app (WKWebView/native — not subject to mixed-content rules). Must be resolved before any venue pilot. |
 
 ---
 
@@ -334,7 +336,7 @@ Order all in a single procurement to minimise delivery delays:
 - [ ] **HDMI 2.0 cable, 5m** *(Stage 2 — for projector run)*
 - [ ] **Matte white acrylic / paint sample sheet 160×90cm** *(Stage 2 — table surface)*
 
-Estimated total Stage 1 + 2: **~£1,580 + monitor.**
+Estimated total Stage 1 + 2: **~£1,680 + monitor (~£270) ≈ £1,950 all-in.**
 
 ---
 
@@ -342,8 +344,8 @@ Estimated total Stage 1 + 2: **~£1,580 + monitor.**
 
 1. **Sign-off this document** with SRS Dynamic (Noel) — confirms hardware spend authorisation
 2. **Place Stage 1 order** — Pi 5 kit + monitor (~£420)
-3. **Start `lumen-player` repository** — new repo under [GitHub org / Wolsten Studios], build Lumen Player MVP in parallel with hardware delivery
-4. **Pi 5 arrives → flash → deploy Lumen Player → end-to-end test from production iPad app** — Stage 1 milestone
+3. **Lumen Player is already built** (`lumen-player/` in the main repo) — finish status heartbeat + TLS plan while hardware ships
+4. **Pi 5 arrives → flash → deploy Lumen Player → end-to-end test from production iPad app** — Stage 1 milestone (includes the H.264 decode benchmark, risk #8)
 5. **Place Stage 2 order** — BenQ projector + stand + cabling (~£1,160)
 6. **Assemble the table** — first physical Lumen table running on the bench
 7. **Record demo footage + integrate findings** into SRS Dynamic's pitch deck and the Phase 3 production hardware spec
