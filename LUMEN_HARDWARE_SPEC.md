@@ -166,7 +166,7 @@ No inbound from the internet is needed — control is LAN-only.
 
 ## 5. The Lumen Player
 
-The on-table software. This component **does not yet exist** and is the critical Phase 2/3 build.
+The on-table software. This component **exists in this repo** at `lumen-player/` (Python 3.11, mpv via JSON IPC, ~80% complete — see `lumen-player/README.md`).
 
 ### 5.1 What it does
 
@@ -190,17 +190,22 @@ A long-running process on the Pi that:
 
 ### 5.3 WebSocket protocol
 
-Commands sent by iPad → Pi (JSON over WebSocket text frames):
+Commands sent by iPad → Pi (JSON over WebSocket text frames).
+
+> **Canonical field names (2026-06-10):** the command field is **`action`** and the
+> wall-clock key is **`timestamp`** (ms) — matching what the production dashboard
+> (`QuickPlay.tsx` / `ControlPanel.tsx`) actually sends. The player additionally
+> accepts `type` / `timestamp_ms` as legacy aliases from earlier drafts of this spec.
 
 | Command | Payload | Behaviour |
 |---|---|---|
-| `play` | `{type:"play", show_id, timestamp_ms, volume?, brightness?}` | Fetch show row from Supabase, look up `mux_playback_id`, construct HLS URL, start mpv with seek computed from `timestamp_ms` |
-| `pause` | `{type:"pause"}` | Send `cycle pause` to mpv |
-| `resume` | `{type:"resume"}` | Same — toggles |
-| `stop` | `{type:"stop"}` | Stop mpv, return to idle state (blank screen) |
-| `volume` | `{type:"volume", value: 0..1}` | Set mpv volume |
-| `brightness` | `{type:"brightness", value: 0..1}` | Software brightness (mpv `--brightness=<-100..100>` mapped) |
-| `ping` | `{type:"ping"}` | Health check, Pi responds with `pong` |
+| `play` | `{action:"play", show_id, timestamp, volume?, brightness?}` | Fetch show row from Supabase, look up `mux_playback_id`, construct HLS URL, start mpv with seek computed from `timestamp` |
+| `pause` | `{action:"pause"}` | Send `cycle pause` to mpv |
+| `resume` | `{action:"resume"}` | Same — toggles |
+| `stop` | `{action:"stop"}` | Stop mpv, return to idle state (blank screen) |
+| `volume` | `{action:"volume", value: 0..1}` | Set mpv volume |
+| `brightness` | `{action:"brightness", value: 0..1}` | Software brightness (mpv `--brightness=<-100..100>` mapped) |
+| `ping` | `{action:"ping"}` | Health check, Pi responds with `pong` |
 
 Optional Pi → iPad messages over the same socket:
 
@@ -307,7 +312,7 @@ Estimated build time: **2–3 days of focused work** for the MVP, in a separate 
 | 2 | **Ambient light vs projector brightness.** Restaurants at dinner-service typically run 50–200 lux. Projector brightness vs contrast ratio at that level is the visual quality determinant. | Stage 2 includes a deliberate brightness/lux test. Findings inform production projector spec. |
 | 3 | **WiFi sync jitter.** If a venue insists on wireless tables (no cable runs), multi-table sync degrades. | Strongly recommend wired ethernet in venue contracts. WiFi is fallback only and may produce visible drift. |
 | 4 | **Pi 5 thermal under sustained 4K playback.** 24/7 4K HLS decode generates heat. | Argon NEO 5 passive heatsink case rated for this load. Monitor temps during Stage 2 burn-in. |
-| 5 | **Lumen Player not yet built.** All of § 5 is forward work. | Built during Stage 1 (timeboxed 2–3 days). |
+| 5 | ~~Lumen Player not yet built.~~ **Resolved:** player implemented at `lumen-player/` (~80% complete). Remaining gaps: status heartbeat, TLS for `wss:` from HTTPS dashboards. | Finish remaining gaps during Stage 1 bench testing. |
 | 6 | **Supabase service key on Pi.** Each Pi would need a service-role key to update its `tables.status` — sharing that key with field devices is a security concern. | Phase 2/3: replace with a dedicated low-privilege Supabase JWT minted per table, or proxy status updates through the Lumen app server. Out of scope for prototype. |
 | 7 | **Projector lifespan & cost-per-hour.** BenQ TK700STi lamp life is ~4,000 hours at high brightness — ~3 years of dinner service. Replacement lamps £200. Production projector spec should favour laser engines for longer life. | Document in production hardware decision. |
 

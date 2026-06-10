@@ -90,27 +90,31 @@ In another terminal, send commands using `wscat`:
 npm install -g wscat
 wscat -c ws://localhost:8765
 
-> {"type":"ping"}
+> {"action":"ping"}
 < {"type":"pong","ts_ms":1717414800000}
 
-> {"type":"play","show_id":"<uuid-of-a-published-show>","timestamp_ms":1717414800000}
+> {"action":"play","show_id":"<uuid-of-a-published-show>","timestamp":1717414800000}
 < {"type":"status","state":"playing","show_id":"..."}
 
-> {"type":"stop"}
+> {"action":"stop"}
 < {"type":"status","state":"idle"}
 ```
 
 ## WebSocket protocol
 
+Commands use the **`action`** field with a **`timestamp`** key (in ms) — this is what
+the production dashboard (QuickPlay / ControlPanel) sends. The player also accepts
+`type` / `timestamp_ms` as legacy aliases.
+
 | Direction | Command | Payload |
 |---|---|---|
-| iPad → Pi | `play` | `{type:"play", show_id, timestamp_ms, volume?, brightness?}` |
-| iPad → Pi | `pause` | `{type:"pause"}` |
-| iPad → Pi | `resume` | `{type:"resume"}` |
-| iPad → Pi | `stop` | `{type:"stop"}` |
-| iPad → Pi | `volume` | `{type:"volume", value: 0..1}` |
-| iPad → Pi | `brightness` | `{type:"brightness", value: 0..1}` |
-| iPad → Pi | `ping` | `{type:"ping"}` |
+| iPad → Pi | `play` | `{action:"play", show_id, timestamp, volume?, brightness?}` |
+| iPad → Pi | `pause` | `{action:"pause"}` |
+| iPad → Pi | `resume` | `{action:"resume"}` |
+| iPad → Pi | `stop` | `{action:"stop"}` |
+| iPad → Pi | `volume` | `{action:"volume", value: 0..1}` |
+| iPad → Pi | `brightness` | `{action:"brightness", value: 0..1}` |
+| iPad → Pi | `ping` | `{action:"ping"}` |
 | Pi → iPad | `status` | `{type:"status", state, show_id?}` |
 | Pi → iPad | `pong` | `{type:"pong", ts_ms}` |
 | Pi → iPad | `ok` | `{type:"ok"}` (for fire-and-forget commands) |
@@ -118,10 +122,10 @@ wscat -c ws://localhost:8765
 
 ## Sync model
 
-On `play`, the iPad sends a wall-clock `timestamp_ms`. The Pi computes:
+On `play`, the iPad sends a wall-clock `timestamp` (ms). The Pi computes:
 
 ```
-elapsed_s = (now_ms - timestamp_ms) / 1000
+elapsed_s = (now_ms - timestamp) / 1000
 offset_s  = elapsed_s % video_duration_s
 ```
 

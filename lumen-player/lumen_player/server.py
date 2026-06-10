@@ -45,7 +45,9 @@ class LumenPlayerServer:
             log.info("client disconnected: %s", peer)
 
     async def _dispatch(self, cmd: dict[str, Any], ws) -> None:
-        ctype = cmd.get("type")
+        # Canonical field is "action" (what the dashboard sends);
+        # "type" is accepted as a legacy alias per the original hardware spec.
+        ctype = cmd.get("action") or cmd.get("type")
         try:
             if ctype == "play":
                 await self._handle_play(cmd, ws)
@@ -80,7 +82,9 @@ class LumenPlayerServer:
             await ws.send(json.dumps({"type": "error", "message": "play missing show_id"}))
             return
 
-        timestamp_ms = int(cmd.get("timestamp_ms", time.time() * 1000))
+        # Canonical field is "timestamp" (what the dashboard sends);
+        # "timestamp_ms" is accepted as a legacy alias.
+        timestamp_ms = int(cmd.get("timestamp") or cmd.get("timestamp_ms") or time.time() * 1000)
 
         show = await self._supabase.get_show(show_id)
         if not show or not show.get("mux_playback_id"):

@@ -302,7 +302,7 @@ The web dashboard sends commands to each projector via WebSocket. There is a **s
 
 **Important:** the dashboard code uses `wss:` when on HTTPS and `ws:` when on HTTP. In production with HTTPS dashboards, the player needs a valid TLS cert — usually solved with a local reverse proxy or HTTP-only over a private VLAN.
 
-The Lumen Player codebase is **not in this repo**. It's referenced but lives separately.
+The Lumen Player codebase **lives in this repo** at `lumen-player/` (Python 3.11 + mpv; see `lumen-player/README.md`).
 
 ---
 
