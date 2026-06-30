@@ -83,8 +83,8 @@ export default function UploadStudio({}: UploadStudioProps) {
         setMuxUploadId(data.uploadId);
         setUpload(key, { status: "done", url: data.uploadId, progress: 100 });
       } else {
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-        await uploadToSupabase(supabaseUrl, data.storagePath, data.token, file, (pct) => {
+        const apiKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
+        await uploadToSupabase(data.signedUrl, apiKey, file, (pct) => {
           setUpload(key, { progress: pct });
         });
         setUpload(key, { status: "done", url: data.publicUrl, progress: 100 });

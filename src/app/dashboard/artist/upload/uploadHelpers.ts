@@ -61,9 +61,8 @@ export async function validate(key: FileKey, file: File): Promise<void> {
 }
 
 export function uploadToSupabase(
-  supabaseUrl: string,
-  storagePath: string,
-  token: string,
+  signedUrl: string,
+  apiKey: string,
   file: File,
   onProgress: (pct: number) => void
 ): Promise<void> {
@@ -72,9 +71,19 @@ export function uploadToSupabase(
     formData.append("cacheControl", "3600");
     formData.append("", file, file.name);
 
+    // Supabase signed-upload endpoint: PUT with the one-time token carried in
+    // the query string of `signedUrl` (createSignedUploadUrl already embedded
+    // it). The token is what authorizes the write, so storage RLS is bypassed
+    // server-side. The `apikey`/Authorization headers only satisfy the API
+    // gateway — they must be the publishable (anon) key, NOT the upload token.
+    //
+    // Sending the token as `Authorization: Bearer` with no `?token=` makes
+    // storage-api treat this as an ordinary user upload, which RLS then
+    // rejects with "new row violates row-level security policy".
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", `${supabaseUrl}/storage/v1/object/upload/sign/${storagePath}`);
-    xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+    xhr.open("PUT", signedUrl);
+    xhr.setRequestHeader("apikey", apiKey);
+    xhr.setRequestHeader("Authorization", `Bearer ${apiKey}`);
     xhr.setRequestHeader("x-upsert", "true");
 
     xhr.upload.onprogress = (e) => {

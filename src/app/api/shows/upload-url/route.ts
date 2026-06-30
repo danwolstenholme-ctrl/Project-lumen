@@ -49,8 +49,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       kind: "supabase",
-      token: data.token,
-      storagePath: `${BUCKET}/${filePath}`,
+      signedUrl: data.signedUrl,
       publicUrl: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${filePath}`,
     });
   }
