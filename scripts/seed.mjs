@@ -84,11 +84,11 @@ const primaryEmail = (u) =>
   u.emailAddresses[0]?.emailAddress ?? "";
 const fullName = (u) => `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim();
 
-async function setupAccount(email, role, fallbackName) {
+async function setupAccount(email, role, fallbackName, extra = {}) {
   const u = await findUserByEmail(email);
   await clerk.users.updateUserMetadata(u.id, { publicMetadata: { role } });
   const name = fullName(u) || fallbackName;
-  const row = { clerk_id: u.id, role, name, email: primaryEmail(u) };
+  const row = { clerk_id: u.id, role, name, email: primaryEmail(u), ...extra };
   if (role === "artist") row.slug = slugify(name);
   const { error } = await supabase.from("users").upsert(row, { onConflict: "clerk_id" });
   if (error) throw new Error(`users upsert (${role}): ${error.message}`);
@@ -104,7 +104,12 @@ function die(label, error) {
 console.log("Project Lumen — seeding demo data\n");
 
 console.log("Accounts:");
-const artist = await setupAccount(artistEmail, "artist", "Demo Artist");
+const artist = await setupAccount(artistEmail, "artist", "Demo Artist", {
+  verified: true,
+  artist_of_month: true,
+  bio: "Audiovisual artist crafting immersive 4K projection pieces for dining spaces — slow, cinematic, made to loop.",
+  avatar_url: "https://i.pravatar.cc/300?img=12",
+});
 const venue = await setupAccount(venueEmail, "venue", "Demo Venue");
 
 // Clean up anything a previous run created, in FK-safe order.
@@ -133,7 +138,6 @@ const showRows = SHOWS.map((s, i) => ({
   mux_status: "ready",
   status: "published",
   featured: i < 2,                 // first two boosted to the top of the library
-  artist_of_month: i === 0,
   video_metadata: { width: 3840, height: 2160, frame_rate: 60, duration: 120 + i * 15, audio: { channels: 2 } },
   created_at: monthsAgo(i % 4),
 }));
