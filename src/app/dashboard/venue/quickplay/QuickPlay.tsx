@@ -3,12 +3,14 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
-  Play, Square, Volume2, Sun, Film, Sparkles, Settings2, X, Check,
+  Play, Square, Volume2, VolumeX, Sun, Film, Sparkles, Settings2, X, Check,
   MonitorPlay, Layers, Wifi, WifiOff, Search, ChevronRight, Zap,
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { toast } from "@/app/dashboard/venue/toast";
 import { TableCommandPublisher, type TableCommand } from "@/app/dashboard/venue/realtime";
+import PreviewVideo from "@/app/dashboard/venue/PreviewVideo";
+import SyncedVideo from "@/app/dashboard/venue/SyncedVideo";
 
 interface Show {
   id: string;
@@ -48,6 +50,10 @@ export default function QuickPlay({
   const [tables, setTables] = useState<Table[]>(initialTables);
   const [defaultShow, setDefaultShow] = useState<Show | null>(initialDefault);
   const [playingShowId, setPlayingShowId] = useState<string | null>(null);
+  // Wall-clock the current show started — shared with the tables so the
+  // operator's hero monitor stays frame-aligned with the projectors.
+  const [playStartedAt, setPlayStartedAt] = useState<number | null>(null);
+  const [previewMuted, setPreviewMuted] = useState(true);
   const [volume, setVolume] = useState(initialVolume);
   const [brightness, setBrightness] = useState(initialBrightness);
   const [clock, setClock] = useState(liveClock());
@@ -114,6 +120,7 @@ export default function QuickPlay({
       prev.map((t) => (target.some((x) => x.id === t.id) ? { ...t, status: "online_playing" } : t))
     );
     setPlayingShowId(show.id);
+    setPlayStartedAt(ts);
     toast.success(`Now playing ${show.title} on ${target.length} ${target.length === 1 ? "table" : "tables"}`);
   }, [tables, sendCommand]);
 
@@ -121,6 +128,7 @@ export default function QuickPlay({
     broadcast({ action: "stop" });
     setTables((prev) => prev.map((t) => (t.status === "online_playing" ? { ...t, status: "online_idle" } : t)));
     setPlayingShowId(null);
+    setPlayStartedAt(null);
     toast.success("All tables stopped");
   }, [broadcast]);
 
@@ -161,6 +169,10 @@ export default function QuickPlay({
   );
 
   const isPlaying = playingShowId !== null;
+  // While casting, the hero becomes the live monitor for whatever is playing
+  // (which may be a grid show, not the default). Otherwise it shows the default.
+  const playingShow = isPlaying ? shows.find((s) => s.id === playingShowId) ?? defaultShow : defaultShow;
+  const heroShow = playingShow;
 
   return (
     <div
@@ -226,38 +238,62 @@ export default function QuickPlay({
 
               {/* Hero card */}
               <div className="relative rounded-3xl overflow-hidden border border-white/[0.08] aspect-[2/1]">
-                {defaultShow?.thumbnail_url ? (
-                  <img src={defaultShow.thumbnail_url} alt={defaultShow.title} className="absolute inset-0 w-full h-full object-cover" />
+                {isPlaying && playStartedAt !== null ? (
+                  // Live monitor: locked to the same clock as the tables.
+                  <SyncedVideo
+                    src={heroShow?.preview_url ?? null}
+                    poster={heroShow?.thumbnail_url ?? null}
+                    startedAt={playStartedAt}
+                    muted={previewMuted}
+                    alt={heroShow?.title ?? "Now playing"}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
                 ) : (
-                  <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-950/40 to-purple-950/40 flex items-center justify-center">
-                    <Film className="w-16 h-16 text-zinc-700" />
-                  </div>
+                  // Idle: ambient muted preview of the default show.
+                  <PreviewVideo
+                    src={defaultShow?.preview_url ?? null}
+                    poster={defaultShow?.thumbnail_url ?? null}
+                    alt={defaultShow?.title ?? "Tonight's show"}
+                    mode="auto"
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
 
-                {/* Live pill */}
-                {isPlaying && playingShowId === defaultShow?.id && (
-                  <div className="absolute top-5 right-5 flex items-center gap-2 px-3 py-1.5 rounded-full bg-fuchsia-500/20 backdrop-blur-md border border-fuchsia-500/40">
-                    <span className="w-1.5 h-1.5 rounded-full bg-fuchsia-400 animate-pulse" />
-                    <span className="font-manrope text-[10px] font-semibold uppercase tracking-widest text-fuchsia-200">Live</span>
-                  </div>
+                {/* Live pill + mute toggle (while casting) */}
+                {isPlaying && (
+                  <>
+                    <div className="absolute top-5 right-5 flex items-center gap-2 px-3 py-1.5 rounded-full bg-fuchsia-500/20 backdrop-blur-md border border-fuchsia-500/40">
+                      <span className="w-1.5 h-1.5 rounded-full bg-fuchsia-400 animate-pulse" />
+                      <span className="font-manrope text-[10px] font-semibold uppercase tracking-widest text-fuchsia-200">Live · in sync</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewMuted((m) => !m)}
+                      aria-label={previewMuted ? "Unmute preview" : "Mute preview"}
+                      title={previewMuted ? "Unmute preview" : "Mute preview"}
+                      className="absolute top-5 left-5 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/10 flex items-center justify-center text-zinc-200 hover:text-white hover:bg-black/70 transition-colors"
+                    >
+                      {previewMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                    </button>
+                  </>
                 )}
 
                 {/* Hero text + button */}
                 <div className="absolute inset-x-0 bottom-0 p-10 flex items-end justify-between gap-8">
                   <div className="flex-1 min-w-0">
                     <h1 className="font-raleway text-5xl font-bold tracking-tight leading-none">
-                      {defaultShow?.title ?? "Pick a show"}
+                      {heroShow?.title ?? "Pick a show"}
                     </h1>
-                    {defaultShow?.artist_name && (
-                      <p className="font-manrope text-zinc-300 mt-2 text-base">by {defaultShow.artist_name}</p>
+                    {heroShow?.artist_name && (
+                      <p className="font-manrope text-zinc-300 mt-2 text-base">by {heroShow.artist_name}</p>
                     )}
                   </div>
 
-                  {defaultShow && (
+                  {heroShow && (
                     <button
                       type="button"
-                      onClick={() => isPlaying ? stopEverywhere() : playEverywhere(defaultShow)}
+                      onClick={() => isPlaying ? stopEverywhere() : playEverywhere(heroShow)}
                       disabled={onlineTables.length === 0}
                       className={`relative shrink-0 inline-flex items-center gap-3 px-8 py-5 rounded-2xl font-raleway text-lg font-bold tracking-wide transition-all active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed ${
                         isPlaying
@@ -307,22 +343,24 @@ export default function QuickPlay({
                         style={{ minHeight: 44 }}
                       >
                         <div className="relative aspect-video bg-zinc-900">
-                          {show.thumbnail_url ? (
-                            <img src={show.thumbnail_url} alt={show.title} className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center"><Film className="w-5 h-5 text-zinc-700" /></div>
-                          )}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent" />
+                          <PreviewVideo
+                            src={show.preview_url}
+                            poster={show.thumbnail_url}
+                            alt={show.title}
+                            mode="hover"
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent pointer-events-none" />
                           {isThisPlaying ? (
-                            <div className="absolute inset-0 flex items-center justify-center bg-fuchsia-600/30 backdrop-blur-sm">
+                            <div className="absolute inset-0 flex items-center justify-center bg-fuchsia-600/30 backdrop-blur-sm pointer-events-none">
                               <Square className="w-6 h-6 text-white" fill="currentColor" />
                             </div>
                           ) : (
-                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
+                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 pointer-events-none">
                               <Play className="w-7 h-7 text-white" fill="white" />
                             </div>
                           )}
-                          <div className="absolute bottom-1.5 left-2 right-2">
+                          <div className="absolute bottom-1.5 left-2 right-2 pointer-events-none">
                             <p className="font-raleway font-semibold text-xs leading-tight line-clamp-1 text-left">
                               {show.title}
                             </p>
@@ -436,13 +474,15 @@ export default function QuickPlay({
                       }`}
                     >
                       <div className="relative aspect-video bg-zinc-900">
-                        {show.thumbnail_url ? (
-                          <img src={show.thumbnail_url} alt={show.title} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center"><Film className="w-6 h-6 text-zinc-700" /></div>
-                        )}
+                        <PreviewVideo
+                          src={show.preview_url}
+                          poster={show.thumbnail_url}
+                          alt={show.title}
+                          mode="hover"
+                          className="w-full h-full object-cover"
+                        />
                         {selected && (
-                          <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-fuchsia-500 flex items-center justify-center">
+                          <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-fuchsia-500 flex items-center justify-center pointer-events-none">
                             <Check className="w-3.5 h-3.5 text-white" />
                           </div>
                         )}

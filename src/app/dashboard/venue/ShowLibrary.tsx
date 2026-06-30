@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Search, Film, CheckCircle2, Loader2, MonitorPlay } from "lucide-react";
 import Link from "next/link";
 import { toast } from "./toast";
+import PreviewVideo from "./PreviewVideo";
 
 interface Show {
   id: string;
@@ -136,28 +137,24 @@ export default function ShowLibrary({ shows, licensedShowIds }: ShowLibraryProps
                 key={show.id}
                 className="group relative flex flex-col rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
               >
-                {/* Thumbnail */}
+                {/* Thumbnail — hover to preview the show */}
                 <div className="relative aspect-video bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
-                  {show.thumbnail_url ? (
-                    <img
-                      src={show.thumbnail_url}
-                      alt={show.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900">
-                      <Film className="w-8 h-8 text-zinc-400 dark:text-zinc-600" />
-                    </div>
-                  )}
+                  <PreviewVideo
+                    src={show.preview_url}
+                    poster={show.thumbnail_url}
+                    alt={show.title}
+                    mode="hover"
+                    className="w-full h-full object-cover"
+                  />
                   {show.category && (
-                    <div className="absolute top-2.5 left-2.5">
+                    <div className="absolute top-2.5 left-2.5 pointer-events-none">
                       <span className={`inline-block text-[10px] font-manrope font-medium uppercase tracking-widest px-2 py-0.5 rounded border ${categoryClass(show.category)}`}>
                         {show.category}
                       </span>
                     </div>
                   )}
                   {isLicensed && (
-                    <div className="absolute top-2.5 right-2.5">
+                    <div className="absolute top-2.5 right-2.5 pointer-events-none">
                       <div className="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                       </div>
