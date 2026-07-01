@@ -23,6 +23,7 @@ class MpvPlayer:
         self._proc: asyncio.subprocess.Process | None = None
         self._reader: asyncio.StreamReader | None = None
         self._writer: asyncio.StreamWriter | None = None
+        self._stderr_task: asyncio.Task[None] | None = None
         self._req_id = 0
         self._lock = asyncio.Lock()
 
@@ -56,6 +57,7 @@ class MpvPlayer:
             stdout=asyncio.subprocess.DEVNULL,
             stderr=asyncio.subprocess.PIPE,
         )
+        self._stderr_task = asyncio.create_task(self._log_stderr())
 
         # Wait for mpv to create the IPC socket (up to 10s).
         for _ in range(50):
@@ -82,6 +84,23 @@ class MpvPlayer:
             except asyncio.TimeoutError:
                 self._proc.kill()
                 await self._proc.wait()
+        if self._stderr_task:
+            self._stderr_task.cancel()
+            try:
+                await self._stderr_task
+            except asyncio.CancelledError:
+                pass
+
+    async def _log_stderr(self) -> None:
+        if self._proc is None or self._proc.stderr is None:
+            return
+        while True:
+            line = await self._proc.stderr.readline()
+            if not line:
+                return
+            text = line.decode(errors="replace").strip()
+            if text:
+                log.warning("mpv: %s", text)
 
     async def _command(self, *args: Any) -> dict:
         async with self._lock:
@@ -98,12 +117,15 @@ class MpvPlayer:
                     raise RuntimeError("mpv socket closed unexpectedly")
                 msg = json.loads(line.decode())
                 if msg.get("request_id") == self._req_id:
+                    if msg.get("error") != "success":
+                        raise RuntimeError(f"mpv command failed: {args[0]}: {msg.get('error')}")
                     return msg
 
     async def play(self, url: str, start_offset_seconds: float = 0.0) -> None:
         """Load and play an HLS URL, seeking to start_offset_seconds first."""
         offset = max(0.0, start_offset_seconds)
-        await self._command("loadfile", url, "replace", f"start={offset:.3f}")
+        log.info("loading HLS stream in mpv: %s", url)
+        await self._command("loadfile", url, "replace", -1, {"start": f"{offset:.3f}"})
         await self._command("set_property", "pause", False)
 
     async def stop_playback(self) -> None:
