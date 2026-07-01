@@ -59,6 +59,7 @@ export default function QuickPlay({
   const [clock, setClock] = useState(liveClock());
   const [pickerOpen, setPickerOpen] = useState(false);
   const [savingDefault, setSavingDefault] = useState(false);
+  const [sendingCommand, setSendingCommand] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   const publisherRef = useRef<TableCommandPublisher | null>(null);
@@ -94,17 +95,21 @@ export default function QuickPlay({
   const onlineTables = tables.filter((t) => t.status !== "offline");
 
   const sendCommand = useCallback((table: Table, msg: TableCommand) => {
-    void getPublisher().send(table.id, msg);
+    return getPublisher().send(table.id, msg);
   }, []);
 
-  const broadcast = useCallback((msg: TableCommand) => {
-    tables
-      .filter((t) => t.status !== "offline")
-      .forEach((t) => sendCommand(t, msg));
+  const broadcast = useCallback(async (msg: TableCommand) => {
+    const target = tables.filter((t) => t.status !== "offline");
+    const results = await Promise.all(target.map((t) => sendCommand(t, msg)));
+    return {
+      target,
+      sent: target.filter((_, i) => results[i]),
+    };
   }, [tables, sendCommand]);
 
   // ── The one button: play across every online table ──
-  const playEverywhere = useCallback((show: Show) => {
+  const playEverywhere = useCallback(async (show: Show) => {
+    if (sendingCommand) return;
     if (tables.length === 0) {
       toast.error("Add tables in Settings first");
       return;
@@ -115,31 +120,57 @@ export default function QuickPlay({
       toast.error("No tables online. Check your projector network.");
       return;
     }
-    target.forEach((t) => sendCommand(t, { action: "play", show_id: show.id, timestamp: ts }));
-    setTables((prev) =>
-      prev.map((t) => (target.some((x) => x.id === t.id) ? { ...t, status: "online_playing" } : t))
-    );
-    setPlayingShowId(show.id);
-    setPlayStartedAt(ts);
-    toast.success(`Now playing ${show.title} on ${target.length} ${target.length === 1 ? "table" : "tables"}`);
-  }, [tables, sendCommand]);
+    setSendingCommand(true);
+    try {
+      const results = await Promise.all(target.map((t) => sendCommand(t, { action: "play", show_id: show.id, timestamp: ts })));
+      const sent = target.filter((_, i) => results[i]);
+      if (sent.length === 0) {
+        toast.error("Couldn't reach the table command channel. Refresh Quick Play and try again.");
+        return;
+      }
+      const sentIds = new Set(sent.map((t) => t.id));
+      setTables((prev) =>
+        prev.map((t) => (sentIds.has(t.id) ? { ...t, status: "online_playing" } : t))
+      );
+      setPlayingShowId(show.id);
+      setPlayStartedAt(ts);
+      if (sent.length === target.length) {
+        toast.success(`Now playing ${show.title} on ${sent.length} ${sent.length === 1 ? "table" : "tables"}`);
+      } else {
+        toast.error(`Started ${sent.length} of ${target.length} online tables`);
+      }
+    } finally {
+      setSendingCommand(false);
+    }
+  }, [tables, sendCommand, sendingCommand]);
 
-  const stopEverywhere = useCallback(() => {
-    broadcast({ action: "stop" });
-    setTables((prev) => prev.map((t) => (t.status === "online_playing" ? { ...t, status: "online_idle" } : t)));
-    setPlayingShowId(null);
-    setPlayStartedAt(null);
-    toast.success("All tables stopped");
-  }, [broadcast]);
+  const stopEverywhere = useCallback(async () => {
+    if (sendingCommand) return;
+    setSendingCommand(true);
+    try {
+      const { target, sent } = await broadcast({ action: "stop" });
+      if (target.length > 0 && sent.length === 0) {
+        toast.error("Couldn't reach the table command channel. Try again.");
+        return;
+      }
+      const sentIds = new Set(sent.map((t) => t.id));
+      setTables((prev) => prev.map((t) => (sentIds.has(t.id) ? { ...t, status: "online_idle" } : t)));
+      setPlayingShowId(null);
+      setPlayStartedAt(null);
+      toast.success(sent.length === target.length ? "All tables stopped" : `Stopped ${sent.length} of ${target.length} tables`);
+    } finally {
+      setSendingCommand(false);
+    }
+  }, [broadcast, sendingCommand]);
 
   const handleVolume = useCallback((v: number) => {
     setVolume(v);
-    broadcast({ action: "volume", value: v / 100 });
+    void broadcast({ action: "volume", value: v / 100 });
   }, [broadcast]);
 
   const handleBrightness = useCallback((v: number) => {
     setBrightness(v);
-    broadcast({ action: "brightness", value: v / 100 });
+    void broadcast({ action: "brightness", value: v / 100 });
   }, [broadcast]);
 
   async function setAsDefault(show: Show) {
@@ -294,7 +325,7 @@ export default function QuickPlay({
                     <button
                       type="button"
                       onClick={() => isPlaying ? stopEverywhere() : playEverywhere(heroShow)}
-                      disabled={onlineTables.length === 0}
+                      disabled={onlineTables.length === 0 || sendingCommand}
                       className={`relative shrink-0 inline-flex w-full sm:w-auto items-center justify-center gap-3 px-6 sm:px-8 py-4 sm:py-5 rounded-2xl font-raleway text-base sm:text-lg font-bold tracking-wide transition-all active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed ${
                         isPlaying
                           ? "bg-zinc-100 text-zinc-900 hover:bg-white shadow-2xl"
@@ -305,12 +336,12 @@ export default function QuickPlay({
                       {isPlaying ? (
                         <>
                           <Square className="w-6 h-6" fill="currentColor" />
-                          Stop All Tables
+                          {sendingCommand ? "Stopping..." : "Stop All Tables"}
                         </>
                       ) : (
                         <>
                           <Play className="w-6 h-6" fill="currentColor" />
-                          Start the Show
+                          {sendingCommand ? "Starting..." : "Start the Show"}
                         </>
                       )}
                     </button>
