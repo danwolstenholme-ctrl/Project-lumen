@@ -78,6 +78,9 @@ sudo journalctl -u lumen-player -f
 
 You can run the player on your Mac for protocol testing — mpv works fine, just plays in a regular window instead of fullscreen on a projector.
 
+For the full laptop + iPad + projector rehearsal, follow
+[`scripts/laptop-projector-test.md`](scripts/laptop-projector-test.md).
+
 ```bash
 brew install mpv python@3.11
 
@@ -90,6 +93,8 @@ pip install -r requirements.txt
 export SUPABASE_URL=https://your-project.supabase.co
 export SUPABASE_SERVICE_KEY=eyJ...
 export TABLE_ID=<a-real-tables-row-uuid>
+# Optional: pick the projector display if mpv opens on the wrong screen.
+export MPV_FULLSCREEN_SCREEN=1
 
 python -m lumen_player
 ```

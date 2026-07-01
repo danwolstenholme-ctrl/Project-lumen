@@ -23,7 +23,7 @@ async def amain() -> None:
     log = logging.getLogger("lumen_player")
     log.info("starting Lumen Player for table %s", cfg.table_id)
 
-    player = MpvPlayer(cfg.mpv_ipc_socket)
+    player = MpvPlayer(cfg.mpv_ipc_socket, cfg.mpv_fullscreen_screen)
     supabase = SupabaseClient(cfg.supabase_url, cfg.supabase_service_key, cfg.table_id)
 
     await player.start()

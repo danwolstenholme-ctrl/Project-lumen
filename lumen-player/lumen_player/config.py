@@ -13,6 +13,7 @@ class Config:
     ws_port: int
     log_level: str
     mpv_ipc_socket: str
+    mpv_fullscreen_screen: str | None
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -23,6 +24,7 @@ class Config:
             ws_port=int(os.environ.get("WS_PORT", "8765")),
             log_level=os.environ.get("LOG_LEVEL", "INFO"),
             mpv_ipc_socket=os.environ.get("MPV_IPC_SOCKET", "/tmp/mpv-lumen.sock"),
+            mpv_fullscreen_screen=os.environ.get("MPV_FULLSCREEN_SCREEN") or None,
         )
 
 

@@ -17,8 +17,9 @@ class MpvPlayer:
     `loadfile` / `set_property` commands as iPad commands arrive.
     """
 
-    def __init__(self, socket_path: str):
+    def __init__(self, socket_path: str, fullscreen_screen: str | None = None):
         self._socket_path = socket_path
+        self._fullscreen_screen = fullscreen_screen
         self._proc: asyncio.subprocess.Process | None = None
         self._reader: asyncio.StreamReader | None = None
         self._writer: asyncio.StreamWriter | None = None
@@ -31,7 +32,7 @@ class MpvPlayer:
             sock.unlink()
 
         log.info("starting mpv...")
-        self._proc = await asyncio.create_subprocess_exec(
+        args = [
             "mpv",
             "--idle=yes",
             "--force-window=immediate",
@@ -45,6 +46,12 @@ class MpvPlayer:
             "--keep-open=yes",
             "--hwdec=auto",
             f"--input-ipc-server={self._socket_path}",
+        ]
+        if self._fullscreen_screen:
+            args.append(f"--fs-screen={self._fullscreen_screen}")
+
+        self._proc = await asyncio.create_subprocess_exec(
+            *args,
             stdin=asyncio.subprocess.DEVNULL,
             stdout=asyncio.subprocess.DEVNULL,
             stderr=asyncio.subprocess.PIPE,

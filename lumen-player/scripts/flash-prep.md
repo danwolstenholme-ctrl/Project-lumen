@@ -127,5 +127,5 @@ If nothing happens, check `sudo journalctl -u lumen-player -f` for errors.
 | `mpv did not create IPC socket within 10s` | mpv missing or failed to start | `sudo apt install mpv`; try `mpv --vo=help` to see available video outputs |
 | Black screen, no playback | Show row has no `mux_playback_id` (piece still in `preparing` or `rejected`) | Check the show's `status` and `mux_status` in Supabase |
 | `update_table_status failed` | Wrong `SUPABASE_URL` / `SUPABASE_SERVICE_KEY` / `TABLE_ID` | Re-check `/etc/lumen-player/env` |
-| Table chip stays offline in app | Pi not reachable on LAN, or wrong `ip_address` in tables row | `ping <pi-ip>` from the iPad's LAN |
+| Table chip stays offline in app | Player service is not running, or `TABLE_ID` / Supabase credentials are wrong | Check `sudo journalctl -u lumen-player -f` and confirm the `tables.id` UUID |
 | Audio out of sync between tables | Buffer fill latency variance | Acceptable for ambient content; frame-exact sync is a Phase 3 refinement |
