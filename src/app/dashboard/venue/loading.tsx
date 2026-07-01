@@ -1,8 +1,8 @@
 export default function VenueLibraryLoading() {
   return (
-    <div className="px-8 py-8 max-w-7xl mx-auto w-full">
+    <div className="px-4 py-6 sm:px-6 lg:px-8 lg:py-8 max-w-7xl mx-auto w-full">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
         <div className="flex flex-col gap-2">
           <div className="skeleton h-6 w-32 rounded" />
           <div className="skeleton h-3.5 w-64 rounded" />
@@ -14,7 +14,7 @@ export default function VenueLibraryLoading() {
       </div>
 
       {/* Search */}
-      <div className="skeleton h-10 w-72 rounded-lg mb-8" />
+      <div className="skeleton h-11 w-full max-w-sm rounded-lg mb-8" />
 
       {/* Show grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">

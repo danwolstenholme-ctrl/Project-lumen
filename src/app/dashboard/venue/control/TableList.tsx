@@ -36,7 +36,7 @@ export default function TableList({
       <div className="px-5 pt-5 pb-4 border-b border-white/[0.06]">
         <Link
           href="/dashboard/venue"
-          className="inline-flex items-center gap-1.5 text-zinc-500 text-xs font-manrope mb-4 active:text-zinc-300 transition-colors"
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-lg pr-2 text-zinc-500 text-xs font-manrope mb-2 active:text-zinc-300 transition-colors"
         >
           <ArrowLeft className="w-3 h-3" />
           Dashboard

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Raleway, Manrope } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import Toaster from "@/components/Toaster";
@@ -22,6 +22,13 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   title: "Project Lumen",
   description: "Where dining becomes theatre.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#09090B",
 };
 
 export default function RootLayout({

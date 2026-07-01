@@ -240,8 +240,7 @@ export default function NowPlaying({
               <button
                 type="button"
                 onClick={onSyncAll}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-800 border border-zinc-700 text-xs font-manrope text-zinc-300 active:bg-zinc-700 transition-colors"
-                style={{ minHeight: 32 }}
+                className="inline-flex min-h-11 items-center gap-1.5 px-3 rounded-lg bg-zinc-800 border border-zinc-700 text-xs font-manrope text-zinc-300 active:bg-zinc-700 transition-colors"
               >
                 <RefreshCw className="w-3 h-3" />
                 Sync All

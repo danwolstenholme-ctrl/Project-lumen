@@ -1,34 +1,34 @@
 export default function QuickPlayLoading() {
   return (
-    <div className="fixed inset-0 z-40 flex flex-col bg-[#0A0A0A]">
+    <div className="fixed inset-0 z-40 flex h-dvh flex-col bg-[#0A0A0A] safe-screen">
       {/* Top bar */}
-      <div className="shrink-0 px-8 py-5 border-b border-white/[0.06] flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="shrink-0 px-4 py-3 sm:px-6 lg:px-8 lg:py-5 border-b border-white/[0.06] flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3 sm:gap-4">
           <div className="skeleton h-9 w-24 rounded-lg" />
-          <div className="h-6 w-px bg-white/[0.06]" />
+          <div className="hidden sm:block h-6 w-px bg-white/[0.06]" />
           <div className="flex flex-col gap-1.5">
             <div className="skeleton h-4 w-32 rounded" />
             <div className="skeleton h-3 w-24 rounded" />
           </div>
         </div>
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-3 sm:gap-5">
           <div className="skeleton h-7 w-16 rounded" />
           <div className="skeleton h-8 w-28 rounded-lg" />
         </div>
       </div>
 
       {/* Main */}
-      <div className="flex-1 flex">
-        <div className="flex-1 flex items-center justify-center p-10">
-          <div className="w-full max-w-4xl flex flex-col gap-8">
+      <div className="flex-1 flex min-h-0 flex-col lg:flex-row">
+        <div className="flex-1 flex items-center justify-center overflow-y-auto p-4 sm:p-6 lg:p-10">
+          <div className="w-full max-w-4xl flex flex-col gap-5 sm:gap-8">
             <div className="flex items-center justify-between">
               <div className="skeleton h-6 w-32 rounded-full" />
               <div className="skeleton h-4 w-24 rounded" />
             </div>
-            <div className="skeleton aspect-[2/1] w-full rounded-3xl" />
+            <div className="skeleton aspect-[4/3] sm:aspect-[2/1] w-full rounded-2xl sm:rounded-3xl" />
             <div className="flex flex-col gap-3">
               <div className="skeleton h-3 w-40 rounded" />
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[...Array(4)].map((_, i) => (
                   <div key={i} className="skeleton aspect-video rounded-xl" />
                 ))}
@@ -37,8 +37,8 @@ export default function QuickPlayLoading() {
           </div>
         </div>
 
-        <aside className="w-[300px] shrink-0 border-l border-white/[0.06] flex flex-col">
-          <div className="px-6 py-5 border-b border-white/[0.06]">
+        <aside className="shrink-0 border-t border-white/[0.06] lg:w-[300px] lg:border-l lg:border-t-0 flex max-h-[34dvh] flex-col lg:max-h-none">
+          <div className="px-4 py-3 sm:px-6 lg:py-5 border-b border-white/[0.06]">
             <div className="skeleton h-5 w-20 rounded" />
           </div>
           <div className="flex-1 py-2">

@@ -149,9 +149,9 @@ export default function ControlPanel({ initialTables, initialShows, venue, venue
   const selectedTables = tables.filter((t) => selectedTableIds.has(t.id));
 
   return (
-    <div className="fixed inset-0 z-50 flex bg-[#0A0A0A] overflow-hidden" style={{ fontFamily: "var(--font-manrope)" }}>
+    <div className="fixed inset-0 z-50 flex h-dvh flex-col lg:flex-row bg-[#0A0A0A] overflow-hidden safe-screen" style={{ fontFamily: "var(--font-manrope)" }}>
       {/* Left — table list */}
-      <div className="w-[260px] shrink-0 border-r border-white/[0.06] h-screen flex flex-col">
+      <div className="h-[190px] sm:h-[220px] lg:h-auto lg:w-[260px] shrink-0 border-b border-white/[0.06] lg:border-b-0 lg:border-r flex flex-col">
         <TableList
           tables={tables}
           selectedTableIds={selectedTableIds}
@@ -164,7 +164,7 @@ export default function ControlPanel({ initialTables, initialShows, venue, venue
       </div>
 
       {/* Centre — show library */}
-      <div className="flex-1 h-screen flex flex-col min-w-0">
+      <div className="flex-1 min-h-0 flex flex-col min-w-0">
         <ControlShowLibrary
           shows={initialShows}
           searchQuery={searchQuery}
@@ -179,7 +179,7 @@ export default function ControlPanel({ initialTables, initialShows, venue, venue
       </div>
 
       {/* Right — now playing */}
-      <div className="w-[320px] shrink-0 border-l border-white/[0.06] h-screen flex flex-col">
+      <div className="h-[260px] sm:h-[280px] lg:h-auto lg:w-[320px] shrink-0 border-t border-white/[0.06] lg:border-t-0 lg:border-l flex flex-col">
         <NowPlaying
           selectedTables={selectedTables}
           tablePlayMap={tablePlayMap}

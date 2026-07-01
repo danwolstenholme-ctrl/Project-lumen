@@ -71,10 +71,10 @@ export default function ShowLibrary({ shows, licensedShowIds }: ShowLibraryProps
   }
 
   return (
-    <div className="px-8 py-8 max-w-7xl mx-auto w-full">
+    <div className="px-4 py-6 sm:px-6 lg:px-8 lg:py-8 max-w-7xl mx-auto w-full">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
+        <div className="min-w-0">
           <h1 className="font-raleway text-2xl font-semibold text-zinc-900 dark:text-white tracking-tight">
             Show Library
           </h1>
@@ -82,13 +82,13 @@ export default function ShowLibrary({ shows, licensedShowIds }: ShowLibraryProps
             Browse and license immersive shows for your venue
           </p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-3 sm:justify-end">
           <span className="text-xs font-manrope text-zinc-500">
             {shows.length} {shows.length === 1 ? "show" : "shows"} available
           </span>
           <Link
             href="/dashboard/venue/control"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-sm font-manrope font-medium text-zinc-600 dark:text-zinc-300 hover:border-fuchsia-500/40 hover:text-zinc-900 dark:hover:text-white transition-colors"
+            className="inline-flex min-h-11 items-center gap-2 px-4 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-sm font-manrope font-medium text-zinc-600 dark:text-zinc-300 hover:border-fuchsia-500/40 hover:text-zinc-900 dark:hover:text-white transition-colors"
           >
             <MonitorPlay className="w-4 h-4 text-fuchsia-400" />
             Open Control Panel
@@ -106,7 +106,7 @@ export default function ShowLibrary({ shows, licensedShowIds }: ShowLibraryProps
           onChange={(e) => setQuery(e.target.value)}
           aria-label="Search shows"
           title="Search shows"
-          className="w-full pl-9 pr-4 py-2.5 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-sm font-manrope text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-zinc-300 dark:focus:border-zinc-700 transition-colors"
+          className="w-full pl-9 pr-4 py-2.5 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-base sm:text-sm font-manrope text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-zinc-300 dark:focus:border-zinc-700 transition-colors"
         />
       </div>
 
@@ -184,7 +184,7 @@ export default function ShowLibrary({ shows, licensedShowIds }: ShowLibraryProps
                     type="button"
                     onClick={() => !isLicensed && licenseShow(show.id)}
                     disabled={isLicensed || isLoading}
-                    className={`mt-auto w-full py-2 rounded-lg text-xs font-manrope font-semibold transition-all flex items-center justify-center gap-1.5 ${
+                    className={`mt-auto w-full min-h-11 rounded-lg text-xs font-manrope font-semibold transition-all flex items-center justify-center gap-1.5 ${
                       isLicensed
                         ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 dark:text-emerald-400 cursor-default"
                         : "bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white shadow-lg shadow-fuchsia-950/40 disabled:opacity-50"

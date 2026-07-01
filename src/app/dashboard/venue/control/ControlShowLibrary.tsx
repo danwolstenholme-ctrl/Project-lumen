@@ -57,12 +57,12 @@ export default function ControlShowLibrary({
   return (
     <div className="flex flex-col h-full relative">
       {/* Header bar */}
-      <div className="flex items-center justify-between gap-4 px-6 pt-5 pb-3 border-b border-white/[0.06] shrink-0">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 pt-4 pb-3 sm:px-6 sm:pt-5 border-b border-white/[0.06] shrink-0">
         <p className="font-raleway font-semibold text-white text-base shrink-0" style={{ fontFamily: "var(--font-raleway)" }}>
           Show Library
         </p>
         {/* Search */}
-        <div className="relative max-w-[220px] w-full">
+        <div className="relative w-full sm:max-w-[260px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 pointer-events-none" />
           <input
             type="text"
@@ -71,13 +71,13 @@ export default function ControlShowLibrary({
             onChange={(e) => onSearchChange(e.target.value)}
             aria-label="Search show library"
             title="Search show library"
-            className="w-full pl-8 pr-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-sm font-manrope text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-700 transition-colors"
+            className="w-full pl-8 pr-3 py-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-base sm:text-sm font-manrope text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-700 transition-colors"
           />
         </div>
       </div>
 
       {/* Category chips */}
-      <div className="flex items-center gap-2 px-6 py-3 overflow-x-auto scrollbar-none shrink-0">
+      <div className="flex items-center gap-2 px-4 py-3 sm:px-6 overflow-x-auto scrollbar-none shrink-0">
         {CATEGORIES.map((cat) => {
           const active = cat === "All" ? activeCategory === "all" || activeCategory === "All" : activeCategory === cat;
           return (
@@ -85,12 +85,12 @@ export default function ControlShowLibrary({
               key={cat}
               type="button"
               onClick={() => onCategoryChange(cat === "All" ? "all" : cat)}
-              className={`shrink-0 px-3.5 py-1.5 rounded-full text-xs font-manrope font-medium border transition-colors ${
+              className={`shrink-0 px-3.5 py-2 rounded-full text-xs font-manrope font-medium border transition-colors ${
                 active
                   ? "bg-fuchsia-600/20 border-fuchsia-500/50 text-fuchsia-300"
                   : "bg-zinc-900 border-zinc-800 text-zinc-400 active:bg-zinc-800"
               }`}
-              style={{ minHeight: 32 }}
+              style={{ minHeight: 44 }}
             >
               {cat}
             </button>
@@ -99,7 +99,7 @@ export default function ControlShowLibrary({
       </div>
 
       {/* Grid */}
-      <div className="flex-1 overflow-y-auto px-6 pb-6">
+      <div className="flex-1 overflow-y-auto px-4 pb-4 sm:px-6 sm:pb-6">
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-3 text-center">
             <Film className="w-8 h-8 text-zinc-700" />
@@ -111,7 +111,7 @@ export default function ControlShowLibrary({
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-4 pt-1">
+          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 pt-1">
             {filtered.map((show) => (
               <ShowCard
                 key={show.id}

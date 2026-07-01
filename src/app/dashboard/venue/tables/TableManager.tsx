@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Pencil, Trash2, Check, X, Wifi, Loader2, Monitor, AlertCircle } from "lucide-react";
+import { Plus, Pencil, Trash2, Check, X, Wifi, Loader2, Monitor, AlertCircle, Copy } from "lucide-react";
 import { toast } from "@/utils/toast";
 
 interface Table {
@@ -124,6 +124,15 @@ export default function TableManager({ venueName: initialVenueName, hasVenue, in
     }
   }
 
+  async function copyTableId(t: Table) {
+    try {
+      await navigator.clipboard.writeText(t.id);
+      toast.success(`${t.label} player ID copied`);
+    } catch {
+      toast.error("Couldn't copy player ID");
+    }
+  }
+
   async function pingTable(t: Table) {
     if (!t.ip_address) { toast.error("No IP configured"); return; }
     toast.success(`Pinging ${t.label}…`);
@@ -139,12 +148,12 @@ export default function TableManager({ venueName: initialVenueName, hasVenue, in
   }
 
   return (
-    <div className="px-8 py-8 max-w-4xl mx-auto w-full">
+    <div className="px-4 py-6 sm:px-6 lg:px-8 lg:py-8 max-w-4xl mx-auto w-full">
       {/* Header */}
       <div className="mb-8">
         <h1 className="font-raleway text-2xl font-semibold text-zinc-900 dark:text-white tracking-tight">Tables</h1>
         <p className="font-manrope text-sm text-zinc-500 mt-1">
-          Each table is a projector running the Lumen player. Add the table&apos;s local IP so the dashboard can control it.
+          Each table is a projector or test laptop running the Lumen player. Cloud control uses the player ID; local IP is optional for bench testing.
         </p>
       </div>
 
@@ -154,7 +163,7 @@ export default function TableManager({ venueName: initialVenueName, hasVenue, in
           <div className="flex-1 min-w-0">
             <p className="font-manrope text-[11px] text-zinc-500 uppercase tracking-widest font-medium">Venue name</p>
             {editingVenueName ? (
-              <div className="flex items-center gap-2 mt-2">
+              <div className="flex flex-wrap items-center gap-2 mt-2">
                 <input
                   type="text"
                   value={venueNameInput}
@@ -163,11 +172,11 @@ export default function TableManager({ venueName: initialVenueName, hasVenue, in
                   placeholder="e.g. The Lumen Room"
                   aria-label="Venue name"
                   title="Venue name"
-                  className="flex-1 max-w-md px-3 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-sm font-manrope text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-fuchsia-500 transition-colors"
+                  className="flex-1 min-w-[220px] max-w-md px-3 py-2.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-base sm:text-sm font-manrope text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-fuchsia-500 transition-colors"
                 />
                 <button
                   type="button" title="Save venue name" onClick={saveVenueName} disabled={busy}
-                  className="p-2 rounded-lg bg-fuchsia-600 hover:bg-fuchsia-500 text-white transition-colors disabled:opacity-50"
+                  className="w-11 h-11 rounded-lg bg-fuchsia-600 hover:bg-fuchsia-500 text-white transition-colors disabled:opacity-50 flex items-center justify-center"
                 >
                   <Check className="w-4 h-4" />
                 </button>
@@ -175,7 +184,7 @@ export default function TableManager({ venueName: initialVenueName, hasVenue, in
                   <button
                     type="button" title="Cancel"
                     onClick={() => { setEditingVenueName(false); setVenueNameInput(venueName); }}
-                    className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-500 transition-colors"
+                    className="w-11 h-11 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-500 transition-colors flex items-center justify-center"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -184,7 +193,7 @@ export default function TableManager({ venueName: initialVenueName, hasVenue, in
             ) : (
               <div className="flex items-center gap-2 mt-1">
                 <p className="font-raleway text-xl font-semibold text-zinc-900 dark:text-white truncate">{venueName || "—"}</p>
-                <button type="button" title="Edit name" onClick={() => setEditingVenueName(true)} className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+                <button type="button" title="Edit name" onClick={() => setEditingVenueName(true)} className="w-11 h-11 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center justify-center">
                   <Pencil className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -195,7 +204,7 @@ export default function TableManager({ venueName: initialVenueName, hasVenue, in
 
       {/* Tables list */}
       <section>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <h2 className="font-raleway text-base font-semibold text-zinc-900 dark:text-white">
             {tables.length} {tables.length === 1 ? "table" : "tables"}
           </h2>
@@ -203,7 +212,7 @@ export default function TableManager({ venueName: initialVenueName, hasVenue, in
             type="button"
             onClick={beginAdd}
             disabled={!hasVenue && !venueName}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white text-sm font-manrope font-semibold disabled:opacity-40 transition-all"
+            className="inline-flex min-h-11 items-center gap-2 px-4 rounded-lg bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white text-sm font-manrope font-semibold disabled:opacity-40 transition-all"
           >
             <Plus className="w-4 h-4" /> Add table
           </button>
@@ -225,7 +234,7 @@ export default function TableManager({ venueName: initialVenueName, hasVenue, in
             </div>
             <p className="font-raleway text-zinc-900 dark:text-white font-semibold">No tables yet</p>
             <p className="font-manrope text-sm text-zinc-500 max-w-sm">
-              Add a table for each projector in your dining room. You&apos;ll need each projector&apos;s local IP address.
+              Add a table for each projector or test laptop. The generated Player ID connects it to Quick Play.
             </p>
           </div>
         ) : (
@@ -260,7 +269,7 @@ export default function TableManager({ venueName: initialVenueName, hasVenue, in
                 );
               }
               return (
-                <div key={t.id} className="flex items-center gap-4 px-5 py-4 border-b border-zinc-100 dark:border-zinc-800/50 last:border-0">
+                <div key={t.id} className="flex flex-wrap items-center gap-3 px-4 sm:px-5 py-4 border-b border-zinc-100 dark:border-zinc-800/50 last:border-0">
                   <span className={`w-2 h-2 rounded-full shrink-0 ${
                     t.status === "online_playing" ? "bg-fuchsia-500 shadow-[0_0_6px_2px_rgba(217,70,239,0.5)]" :
                     t.status === "online_idle" ? "bg-amber-400" : "bg-red-500"
@@ -268,7 +277,10 @@ export default function TableManager({ venueName: initialVenueName, hasVenue, in
                   <div className="flex-1 min-w-0">
                     <p className="font-raleway font-semibold text-zinc-900 dark:text-white">{t.label}</p>
                     <p className="font-manrope text-xs text-zinc-500 mt-0.5 font-mono">
-                      {t.ip_address ? t.ip_address : <span className="italic text-zinc-400 dark:text-zinc-600">No IP set</span>}
+                      {t.ip_address ? t.ip_address : <span className="italic text-zinc-400 dark:text-zinc-600">No local IP set</span>}
+                    </p>
+                    <p className="font-manrope text-[11px] text-zinc-500 mt-1 font-mono truncate">
+                      Player ID: {t.id}
                     </p>
                   </div>
                   <span className="font-manrope text-[10px] uppercase tracking-widest text-zinc-500 shrink-0">
@@ -276,14 +288,17 @@ export default function TableManager({ venueName: initialVenueName, hasVenue, in
                   </span>
                   <div className="flex items-center gap-1 shrink-0">
                     {t.ip_address && (
-                      <button type="button" title="Ping table" onClick={() => pingTable(t)} className="p-2 rounded-lg text-zinc-500 hover:text-fuchsia-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+                      <button type="button" title="Ping table" onClick={() => pingTable(t)} className="w-11 h-11 rounded-lg text-zinc-500 hover:text-fuchsia-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center justify-center">
                         <Wifi className="w-4 h-4" />
                       </button>
                     )}
-                    <button type="button" title="Edit table" onClick={() => beginEdit(t)} className="p-2 rounded-lg text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+                    <button type="button" title="Copy player ID" onClick={() => copyTableId(t)} className="w-11 h-11 rounded-lg text-zinc-500 hover:text-fuchsia-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center justify-center">
+                      <Copy className="w-4 h-4" />
+                    </button>
+                    <button type="button" title="Edit table" onClick={() => beginEdit(t)} className="w-11 h-11 rounded-lg text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center justify-center">
                       <Pencil className="w-4 h-4" />
                     </button>
-                    <button type="button" title="Delete table" onClick={() => deleteTable(t)} className="p-2 rounded-lg text-zinc-500 hover:text-red-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+                    <button type="button" title="Delete table" onClick={() => deleteTable(t)} className="w-11 h-11 rounded-lg text-zinc-500 hover:text-red-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center justify-center">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
@@ -298,10 +313,10 @@ export default function TableManager({ venueName: initialVenueName, hasVenue, in
       <section className="mt-8 p-5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/20">
         <p className="font-manrope text-[11px] uppercase tracking-widest text-zinc-500 font-semibold mb-2">Setup tips</p>
         <ul className="flex flex-col gap-1.5 text-sm font-manrope text-zinc-600 dark:text-zinc-400">
-          <li>• Each Lumen player listens on port <span className="font-mono text-zinc-900 dark:text-zinc-200">8765</span>.</li>
-          <li>• Use the projector&apos;s local IP — typically <span className="font-mono text-zinc-900 dark:text-zinc-200">192.168.x.x</span>.</li>
-          <li>• Make sure your iPad and projectors are on the same Wi-Fi network.</li>
-          <li>• Click <Wifi className="inline w-3 h-3 mx-0.5" /> to test connectivity to any table.</li>
+          <li>• Copy the Player ID into the Lumen player&apos;s <span className="font-mono text-zinc-900 dark:text-zinc-200">TABLE_ID</span> env var.</li>
+          <li>• Quick Play sends commands through Supabase Realtime, so the iPad and player only need internet access.</li>
+          <li>• Local IP is only needed for the WebSocket bench-test fallback on port <span className="font-mono text-zinc-900 dark:text-zinc-200">8765</span>.</li>
+          <li>• Click <Wifi className="inline w-3 h-3 mx-0.5" /> to test local fallback connectivity when an IP is set.</li>
         </ul>
       </section>
     </div>
@@ -316,9 +331,9 @@ function EditRow({
   onSave: () => void; onCancel: () => void; busy: boolean;
 }) {
   return (
-    <div className="flex items-center gap-4 px-5 py-3 border-b border-zinc-100 dark:border-zinc-800/50 last:border-0 bg-zinc-50 dark:bg-white/[0.02]">
-      <div className="w-2" />
-      <div className="flex-1 min-w-0 grid grid-cols-2 gap-3">
+    <div className="flex flex-col gap-3 px-4 sm:px-5 py-3 border-b border-zinc-100 dark:border-zinc-800/50 last:border-0 bg-zinc-50 dark:bg-white/[0.02] sm:flex-row sm:items-center">
+      <div className="hidden sm:block w-2" />
+      <div className="flex-1 min-w-0 grid grid-cols-1 sm:grid-cols-2 gap-3">
         <input
           type="text"
           value={label}
@@ -327,28 +342,28 @@ function EditRow({
           maxLength={40}
           aria-label="Table label"
           title="Table label"
-          className="px-3 py-2 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 text-sm font-manrope text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-fuchsia-500 transition-colors"
+          className="px-3 py-2.5 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 text-base sm:text-sm font-manrope text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-fuchsia-500 transition-colors"
         />
         <input
           type="text"
           value={ip}
           onChange={(e) => onIpChange(e.target.value)}
-          placeholder="192.168.1.50"
+          placeholder="Optional local IP"
           aria-label="Table IP address"
           title="Table IP address"
-          className="px-3 py-2 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 text-sm font-mono text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-fuchsia-500 transition-colors"
+          className="px-3 py-2.5 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 text-base sm:text-sm font-mono text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-fuchsia-500 transition-colors"
         />
       </div>
-      <div className="flex items-center gap-1 shrink-0">
+      <div className="flex items-center justify-end gap-1 shrink-0">
         <button
           type="button" title="Save" onClick={onSave} disabled={busy}
-          className="p-2 rounded-lg bg-fuchsia-600 hover:bg-fuchsia-500 text-white transition-colors disabled:opacity-50"
+          className="w-11 h-11 rounded-lg bg-fuchsia-600 hover:bg-fuchsia-500 text-white transition-colors disabled:opacity-50 flex items-center justify-center"
         >
           {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
         </button>
         <button
           type="button" title="Cancel" onClick={onCancel}
-          className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-500 transition-colors"
+          className="w-11 h-11 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-500 transition-colors flex items-center justify-center"
         >
           <X className="w-4 h-4" />
         </button>

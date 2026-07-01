@@ -32,15 +32,17 @@ export default function ShowExpandModal({ show, selectedCount, onClose, onPlay }
   return (
     /* Full overlay */
     <div
-      className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+      className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 safe-screen"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="relative w-full max-w-lg mx-6 rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-950 shadow-2xl">
+      <div className="relative w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-2xl border border-zinc-800 bg-zinc-950 shadow-2xl">
         {/* Close */}
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-black/60 flex items-center justify-center text-zinc-400 active:text-white transition-colors"
+          title="Close"
+          aria-label="Close"
+          className="absolute top-3 right-3 z-10 w-11 h-11 rounded-full bg-black/60 flex items-center justify-center text-zinc-400 active:text-white transition-colors"
         >
           <X className="w-4 h-4" />
         </button>
