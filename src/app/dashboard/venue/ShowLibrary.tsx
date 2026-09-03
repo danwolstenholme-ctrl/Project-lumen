@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { Search, Film, CheckCircle2, Loader2, MonitorPlay } from "lucide-react";
 import Link from "next/link";
-import { toast } from "./toast";
+import { toast } from "@/utils/toast";
 import PreviewVideo from "./PreviewVideo";
 
 interface Show {

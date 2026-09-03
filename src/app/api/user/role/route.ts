@@ -1,33 +1,35 @@
-import { auth, clerkClient } from "@clerk/nextjs/server";
+import { clerkClient } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/utils/supabase/admin";
+import { requireRole, forbidden, SELF_ASSIGNABLE_ROLES, type Role } from "@/utils/auth";
 
 export async function POST(request: Request) {
-  const { userId } = await auth();
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const guard = await requireRole();
+  if (guard instanceof NextResponse) return guard;
+  const { userId, role: currentRole } = guard;
 
   const { role } = await request.json();
-  if (!["artist", "venue", "admin"].includes(role)) {
+
+  // Onboarding only offers artist and venue. Admin is granted by hand in the
+  // Clerk dashboard, so it must never be self-assignable here.
+  if (!SELF_ASSIGNABLE_ROLES.includes(role as Role)) {
     return NextResponse.json({ error: "Invalid role" }, { status: 400 });
   }
 
-  // Persist role to Clerk publicMetadata
-  const clerk = await clerkClient();
-  await clerk.users.updateUserMetadata(userId, {
-    publicMetadata: { role },
-  });
+  // A role is chosen once, during onboarding. Changing it later would orphan
+  // the user's existing pieces or venue, so it needs an admin.
+  if (currentRole && currentRole !== role) return forbidden();
 
-  // Persist to Supabase
-  const supabase = createAdminClient();
+  const clerk = await clerkClient();
+  await clerk.users.updateUserMetadata(userId, { publicMetadata: { role } });
+
   const clerkUser = await clerk.users.getUser(userId);
   const email =
-    clerkUser.emailAddresses.find(
-      (e) => e.id === clerkUser.primaryEmailAddressId
-    )?.emailAddress ?? "";
+    clerkUser.emailAddresses.find((e) => e.id === clerkUser.primaryEmailAddressId)
+      ?.emailAddress ?? "";
 
-  await supabase.from("users").upsert(
+  const supabase = createAdminClient();
+  const { error } = await supabase.from("users").upsert(
     {
       clerk_id: userId,
       role,
@@ -36,6 +38,8 @@ export async function POST(request: Request) {
     },
     { onConflict: "clerk_id" }
   );
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   return NextResponse.json({ ok: true });
 }

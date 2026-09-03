@@ -1,16 +1,11 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Film, Users, Store, DollarSign, Clock, AlertCircle, ArrowRight, Sparkles } from "lucide-react";
 import { createAdminClient } from "@/utils/supabase/admin";
+import { artistShare } from "@/utils/pricing";
+import { requirePageRole } from "@/utils/auth";
 
 export default async function AdminDashboardPage() {
-  const { userId } = await auth();
-  if (!userId) redirect("/sign-in");
-
-  const user = await currentUser();
-  const role = user?.publicMetadata?.role as string | undefined;
-  if (role && role !== "admin") redirect(`/dashboard/${role}`);
+  await requirePageRole("admin");
 
   const supabase = createAdminClient();
 
@@ -26,7 +21,7 @@ export default async function AdminDashboardPage() {
     supabase.from("users").select("*", { count: "exact", head: true }).eq("role", "venue"),
     supabase.from("shows").select("*", { count: "exact", head: true }).eq("status", "published"),
     supabase.from("shows").select("*", { count: "exact", head: true }).eq("status", "pending"),
-    supabase.from("earnings").select("license_fee, status"),
+    supabase.from("earnings").select("license_fee, artist_share, status"),
     supabase
       .from("shows")
       .select("id, title, thumbnail_url, category, created_at, artist_id")
@@ -36,9 +31,11 @@ export default async function AdminDashboardPage() {
   ]);
 
   const totalRevenue = (earnings ?? []).reduce((sum, r) => sum + (r.license_fee ?? 0), 0);
+  // Sum the artist_share recorded on each row rather than recomputing the
+  // split here — the stored value is what the artist is actually owed.
   const pendingPayouts = (earnings ?? [])
     .filter((r) => r.status === "pending")
-    .reduce((sum, r) => sum + (r.license_fee ?? 0) * 0.7, 0);
+    .reduce((sum, r) => sum + (r.artist_share ?? artistShare(r.license_fee ?? 0)), 0);
 
   const pendingArtistIds = Array.from(new Set((pendingShows ?? []).map((s) => s.artist_id)));
   const { data: pendingArtists } = pendingArtistIds.length

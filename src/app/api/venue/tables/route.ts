@@ -1,6 +1,7 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/utils/supabase/admin";
+import { requireRole } from "@/utils/auth";
+import { FIELD_LIMITS } from "@/utils/limits";
 
 const IP_REGEX = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 
@@ -22,8 +23,9 @@ async function ensureVenue(userId: string) {
 }
 
 export async function POST(req: Request) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const guard = await requireRole("venue");
+  if (guard instanceof NextResponse) return guard;
+  const { userId } = guard;
 
   const { label, ip_address } = await req.json();
   if (!label || typeof label !== "string") {
@@ -39,7 +41,7 @@ export async function POST(req: Request) {
     .from("tables")
     .insert({
       venue_id: venue.id,
-      label: label.slice(0, 40),
+      label: label.slice(0, FIELD_LIMITS.tableLabel),
       ip_address: ip_address ?? null,
       status: "offline",
     })
@@ -51,8 +53,9 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const guard = await requireRole("venue");
+  if (guard instanceof NextResponse) return guard;
+  const { userId } = guard;
 
   const { id, label, ip_address } = await req.json();
   if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
@@ -68,7 +71,7 @@ export async function PATCH(req: Request) {
   const { data, error } = await supabase
     .from("tables")
     .update({
-      ...(label !== undefined ? { label: String(label).slice(0, 40) } : {}),
+      ...(label !== undefined ? { label: String(label).slice(0, FIELD_LIMITS.tableLabel) } : {}),
       ...(ip_address !== undefined ? { ip_address: ip_address || null } : {}),
     })
     .eq("id", id)
@@ -81,8 +84,9 @@ export async function PATCH(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const guard = await requireRole("venue");
+  if (guard instanceof NextResponse) return guard;
+  const { userId } = guard;
 
   const { id } = await req.json();
   if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });

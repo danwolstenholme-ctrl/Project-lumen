@@ -162,8 +162,14 @@ src/
 │       └── admin/               Stats overview, review queue
 ├── components/                 Shared shell, nav, theme, toasts
 └── utils/
+    ├── auth.ts                 Role guards — requireRole (routes), requirePageRole (pages)
+    ├── pricing.ts              Licence fee, artist split, boost prices
     ├── mux.ts                  Lazy-initialised Mux client
     ├── muxValidation.ts        The piece spec + validation + apply-to-row logic
+    ├── limits.ts               Field length caps shared by routes and forms
+    ├── email.ts                HTML escaping for transactional email
+    ├── toast.ts                Toast event emitter
+    ├── useDebouncedCallback.ts Collapses rapid calls (drag-driven controls)
     └── supabase/               admin (service role), client (browser), server (SSR)
 
 lumen-player/                   On-table Python service — has its own README
@@ -345,9 +351,18 @@ only, to avoid a large mechanical refactor. They mean the same thing.
 low-lit dining room and should never render light. The marketing landing page is
 likewise dark-only. Everywhere else supports both themes.
 
-**There is no row-level security.** Access control lives in `src/proxy.ts` plus
-server-side checks in every route. The service-role Supabase client is server-only.
-If you start querying sensitive data directly from the browser, this needs revisiting.
+**There is no row-level security.** Access control lives in three places and
+nowhere else: `src/proxy.ts` decides which routes need a session at all,
+`requireRole()` from [src/utils/auth.ts](src/utils/auth.ts) gates every API route by
+role, and `requirePageRole()` gates every dashboard page. The service-role Supabase
+client is server-only. Use those helpers rather than hand-rolling a check — a route
+that reads `auth()` directly is a route with no role gate. If you start querying
+sensitive data directly from the browser, the whole model needs revisiting.
+
+**Roles are assigned once and admin is never self-assignable.** `/api/user/role`
+accepts only `artist` and `venue`, and refuses to change a role that's already set.
+Admin is granted by editing Clerk public metadata by hand. Keep it that way — the
+endpoint is reachable by any signed-in user.
 
 ---
 
@@ -366,7 +381,10 @@ If you start querying sensitive data directly from the browser, this needs revis
 
 The spec lives in one place — `PIECE_SPEC` in
 [src/utils/muxValidation.ts](src/utils/muxValidation.ts). Change it there and both the
-webhook and the submit-time path pick it up.
+webhook and the submit-time path pick it up. The money constants likewise live only in
+[src/utils/pricing.ts](src/utils/pricing.ts), which the licence flow, the earnings
+ledger, the admin payout view, and the boost checkout all read — so the price an
+artist is quoted is by construction the price Stripe is asked to charge.
 
 ### Database tables
 
@@ -472,8 +490,9 @@ Deliberately not built. Worth knowing before you go looking for them:
    flag by hand.
 3. **No scheduling.** Playback is manual only; there's no "start at 19:00" and no
    automatic cycling between pieces.
-4. **No analytics page.** `ArtistStudio.tsx` links to `/dashboard/artist/analytics`,
-   which does not exist. Dead link.
+4. **No per-piece analytics.** There's no view of how often a piece has played or
+   been licensed. `ArtistStudio.tsx` previously linked to a `/dashboard/artist/analytics`
+   route that was never built; the dead link has been removed rather than left to 404.
 5. **No admin user management.** Users are edited in the Clerk and Supabase dashboards.
 6. **No licence cancellation.** Venues can license a piece but can't release it from
    the UI.

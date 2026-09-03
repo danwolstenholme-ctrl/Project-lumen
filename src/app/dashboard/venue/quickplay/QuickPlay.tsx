@@ -7,7 +7,8 @@ import {
   MonitorPlay, Layers, Wifi, WifiOff, Search, ChevronRight, Zap,
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
-import { toast } from "@/app/dashboard/venue/toast";
+import { useDebouncedCallback } from "@/utils/useDebouncedCallback";
+import { toast } from "@/utils/toast";
 import { TableCommandPublisher, type TableCommand } from "@/app/dashboard/venue/realtime";
 import PreviewVideo from "@/app/dashboard/venue/PreviewVideo";
 import SyncedVideo from "@/app/dashboard/venue/SyncedVideo";
@@ -163,15 +164,34 @@ export default function QuickPlay({
     }
   }, [broadcast, sendingCommand]);
 
+  // A range input fires on every step of a drag. Broadcasting each one would
+  // flood the tables' command channels, and PATCHing each one would hammer the
+  // API, so the slider updates locally and the effects trail behind it.
+  const commitSetting = useDebouncedCallback(
+    useCallback((setting: "volume" | "brightness", v: number) => {
+      void broadcast({ action: setting, value: v / 100 });
+      void fetch("/api/venue/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(
+          setting === "volume" ? { default_volume: v } : { default_brightness: v }
+        ),
+      }).catch(() => {
+        /* The tables already have the value; persistence can wait. */
+      });
+    }, [broadcast]),
+    200
+  );
+
   const handleVolume = useCallback((v: number) => {
     setVolume(v);
-    void broadcast({ action: "volume", value: v / 100 });
-  }, [broadcast]);
+    commitSetting("volume", v);
+  }, [commitSetting]);
 
   const handleBrightness = useCallback((v: number) => {
     setBrightness(v);
-    void broadcast({ action: "brightness", value: v / 100 });
-  }, [broadcast]);
+    commitSetting("brightness", v);
+  }, [commitSetting]);
 
   async function setAsDefault(show: Show) {
     setSavingDefault(true);

@@ -3,6 +3,12 @@
 import { useState } from "react";
 import { Sparkles, Globe, Check, Loader2, ArrowLeft, Film } from "lucide-react";
 import Link from "next/link";
+import {
+  BOOST_PRICES_CENTS,
+  BOOST_TERMS,
+  boostTotalCents,
+  type BoostPlacement,
+} from "@/utils/pricing";
 
 interface Show { id: string; title: string; thumbnail_url: string | null; featured: boolean | null; featured_until: string | null; }
 
@@ -12,30 +18,34 @@ interface Props {
   success: boolean;
 }
 
-type PlacementType = "featured_show" | "homepage_feature";
+type PlacementType = BoostPlacement;
 
+// Prices and discounts come from the shared pricing module, so what the
+// artist is quoted here is exactly what Stripe is asked to charge.
 const PLACEMENTS: { type: PlacementType; label: string; price: number; desc: string; icon: React.ElementType }[] = [
   {
     type: "featured_show",
     label: "Featured Piece",
-    price: 75,
+    price: BOOST_PRICES_CENTS.featured_show / 100,
     desc: "Your piece appears at the top of every venue's library with a Featured badge.",
     icon: Sparkles,
   },
   {
     type: "homepage_feature",
     label: "Homepage Feature",
-    price: 150,
+    price: BOOST_PRICES_CENTS.homepage_feature / 100,
     desc: "Your piece appears in the Featured Experiences section on the Project Lumen marketing homepage.",
     icon: Globe,
   },
 ];
 
-const DURATIONS: { months: number; label: string; discount: number }[] = [
-  { months: 1, label: "1 Month",  discount: 0 },
-  { months: 3, label: "3 Months", discount: 10 },
-  { months: 6, label: "6 Months", discount: 20 },
-];
+const DURATIONS: { months: number; label: string; discount: number }[] = Object.entries(BOOST_TERMS)
+  .map(([months, { discountPct }]) => ({
+    months: Number(months),
+    label: `${months} Month${Number(months) > 1 ? "s" : ""}`,
+    discount: discountPct,
+  }))
+  .sort((a, b) => a.months - b.months);
 
 export default function BoostFlow({ shows, preselectedShowId, success }: Props) {
   const [step, setStep] = useState(success ? 3 : 0);
@@ -68,8 +78,7 @@ export default function BoostFlow({ shows, preselectedShowId, success }: Props) 
 
   const selectedPlacement = PLACEMENTS.find((p) => p.type === placement);
   const selectedDuration = DURATIONS.find((d) => d.months === months)!;
-  const basePrice = selectedPlacement?.price ?? 0;
-  const total = basePrice * months * (1 - selectedDuration.discount / 100);
+  const total = placement ? boostTotalCents(placement, months) / 100 : 0;
 
   async function startCheckout() {
     if (!placement || !selectedShowId) return;

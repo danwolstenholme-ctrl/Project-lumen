@@ -9,6 +9,9 @@ from typing import Any
 
 log = logging.getLogger(__name__)
 
+# How long to wait for mpv to answer a JSON IPC command.
+IPC_TIMEOUT_S = 10
+
 
 class MpvPlayer:
     """Long-lived mpv subprocess controlled over its `--input-ipc-server` socket.
@@ -111,15 +114,25 @@ class MpvPlayer:
             self._writer.write((json.dumps(payload) + "\n").encode())
             await self._writer.drain()
             # mpv may send unsolicited events; read until we get our response.
-            while True:
-                line = await self._reader.readline()
-                if not line:
-                    raise RuntimeError("mpv socket closed unexpectedly")
-                msg = json.loads(line.decode())
-                if msg.get("request_id") == self._req_id:
-                    if msg.get("error") != "success":
-                        raise RuntimeError(f"mpv command failed: {args[0]}: {msg.get('error')}")
-                    return msg
+            # Bounded, so a reply that never arrives fails the command instead
+            # of holding the lock and wedging every later command.
+            async def await_reply() -> dict:
+                while True:
+                    line = await self._reader.readline()  # type: ignore[union-attr]
+                    if not line:
+                        raise RuntimeError("mpv socket closed unexpectedly")
+                    msg = json.loads(line.decode())
+                    if msg.get("request_id") == self._req_id:
+                        if msg.get("error") != "success":
+                            raise RuntimeError(
+                                f"mpv command failed: {args[0]}: {msg.get('error')}"
+                            )
+                        return msg
+
+            try:
+                return await asyncio.wait_for(await_reply(), timeout=IPC_TIMEOUT_S)
+            except asyncio.TimeoutError as e:
+                raise RuntimeError(f"mpv command timed out: {args[0]}") from e
 
     async def play(self, url: str, start_offset_seconds: float = 0.0) -> None:
         """Load and play an HLS URL, seeking to start_offset_seconds first."""

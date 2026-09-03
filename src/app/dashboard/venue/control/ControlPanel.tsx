@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { createClient } from "@/utils/supabase/client";
+import { useDebouncedCallback } from "@/utils/useDebouncedCallback";
 import { TableCommandPublisher, type TableCommand } from "@/app/dashboard/venue/realtime";
 import type { Table, Show, Venue, TablePlayMap } from "./types";
 import TableList from "./TableList";
@@ -13,17 +14,21 @@ interface ControlPanelProps {
   initialShows: Show[];
   venue: Venue;
   venueDbId: string;
+  initialVolume: number;
+  initialBrightness: number;
 }
 
-export default function ControlPanel({ initialTables, initialShows, venue, venueDbId }: ControlPanelProps) {
+export default function ControlPanel({
+  initialTables, initialShows, venue, venueDbId, initialVolume, initialBrightness,
+}: ControlPanelProps) {
   const [tables, setTables] = useState<Table[]>(initialTables);
   const [selectedTableIds, setSelectedTableIds] = useState<Set<string>>(new Set());
   const [tablePlayMap, setTablePlayMap] = useState<TablePlayMap>(new Map());
   const [expandedShowId, setExpandedShowId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
-  const [volume, setVolume] = useState(80);
-  const [brightness, setBrightness] = useState(90);
+  const [volume, setVolume] = useState(initialVolume);
+  const [brightness, setBrightness] = useState(initialBrightness);
 
   const publisherRef = useRef<TableCommandPublisher | null>(null);
   const getPublisher = () => (publisherRef.current ??= new TableCommandPublisher());
@@ -136,15 +141,24 @@ export default function ControlPanel({ initialTables, initialShows, venue, venue
     // Centre column shows full library — user picks a show
   }, [stopSelected]);
 
+  // Debounced: a range input fires on every step of a drag, and each step
+  // would otherwise be a broadcast to every selected table.
+  const commitLevel = useDebouncedCallback(
+    useCallback((setting: "volume" | "brightness", val: number) => {
+      broadcastToSelected({ action: setting, value: val / 100 });
+    }, [broadcastToSelected]),
+    200
+  );
+
   const handleVolumeChange = useCallback((val: number) => {
     setVolume(val);
-    broadcastToSelected({ action: "volume", value: val / 100 });
-  }, [broadcastToSelected]);
+    commitLevel("volume", val);
+  }, [commitLevel]);
 
   const handleBrightnessChange = useCallback((val: number) => {
     setBrightness(val);
-    broadcastToSelected({ action: "brightness", value: val / 100 });
-  }, [broadcastToSelected]);
+    commitLevel("brightness", val);
+  }, [commitLevel]);
 
   const selectedTables = tables.filter((t) => selectedTableIds.has(t.id));
 

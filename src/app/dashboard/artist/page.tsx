@@ -1,15 +1,11 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
+import { currentUser } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import ArtistStudio from "./ArtistStudio";
+import { requirePageRole } from "@/utils/auth";
 
 export default async function ArtistDashboardPage() {
-  const { userId } = await auth();
-  if (!userId) redirect("/sign-in");
-
+  const { userId } = await requirePageRole("artist");
   const user = await currentUser();
-  const role = user?.publicMetadata?.role as string | undefined;
-  if (role && role !== "artist") redirect(`/dashboard/${role}`);
 
   const supabase = createAdminClient();
 

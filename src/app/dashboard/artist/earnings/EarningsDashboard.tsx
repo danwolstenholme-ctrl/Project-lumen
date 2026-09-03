@@ -98,12 +98,17 @@ export default function EarningsDashboard({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ payoutMethod, payoutEmail, payoutIban }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const { error } = await res.json().catch(() => ({ error: null }));
+        throw new Error(error ?? "Failed to save payout settings");
+      }
       setPayoutSaved(true);
       toast.success("Payout settings saved");
       setTimeout(() => setPayoutSaved(false), 3000);
-    } catch {
-      toast.error("Failed to save payout settings");
+    } catch (e) {
+      // Surface the server's reason — "Enter a valid IBAN" is far more useful
+      // than a generic failure.
+      toast.error(e instanceof Error ? e.message : "Failed to save payout settings");
     } finally {
       setSavingPayout(false);
     }

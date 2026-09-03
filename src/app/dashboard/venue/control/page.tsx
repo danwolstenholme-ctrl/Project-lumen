@@ -1,25 +1,20 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 import { createAdminClient } from "@/utils/supabase/admin";
 import ControlPanel from "./ControlPanel";
 import type { Table, Show, Venue } from "./types";
+import { requirePageRole } from "@/utils/auth";
 
 export default async function ControlPanelPage() {
-  const { userId } = await auth();
-  if (!userId) redirect("/sign-in");
-
-  const user = await currentUser();
-  const role = user?.publicMetadata?.role as string | undefined;
-  if (role && role !== "venue") redirect(`/dashboard/${role}`);
+  const { userId } = await requirePageRole("venue");
 
   const supabase = createAdminClient();
 
   // Get venue record
+  // maybeSingle: a venue that hasn't saved settings yet has no row.
   const { data: venueRow } = await supabase
     .from("venues")
-    .select("id, name")
+    .select("id, name, default_volume, default_brightness")
     .eq("user_id", userId)
-    .single();
+    .maybeSingle();
 
   // Get tables for this venue
   const { data: tableRows } = venueRow
@@ -93,6 +88,8 @@ export default async function ControlPanelPage() {
       initialShows={shows}
       venue={venue}
       venueDbId={venue.id}
+      initialVolume={venueRow?.default_volume ?? 80}
+      initialBrightness={venueRow?.default_brightness ?? 90}
     />
   );
 }

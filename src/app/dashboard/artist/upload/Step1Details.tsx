@@ -2,6 +2,7 @@
 
 import { useState, KeyboardEvent } from "react";
 import { X, ArrowRight } from "lucide-react";
+import { FIELD_LIMITS } from "@/utils/limits";
 
 export interface Details {
   title: string;
@@ -57,7 +58,7 @@ export default function Step1Details({ details, onChange, onNext }: Step1Details
           value={details.title}
           onChange={(e) => onChange({ title: e.target.value })}
           placeholder="e.g. Abyssal Tide"
-          maxLength={100}
+          maxLength={FIELD_LIMITS.showTitle}
           aria-label="Piece title"
           className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white font-manrope text-sm placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors"
         />

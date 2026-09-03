@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
-import { toast } from "@/app/dashboard/venue/toast";
+import { toast } from "@/utils/toast";
 import type { Details } from "./Step1Details";
 import type { Uploads } from "./Step2Media";
 import type { FileKey } from "./uploadHelpers";

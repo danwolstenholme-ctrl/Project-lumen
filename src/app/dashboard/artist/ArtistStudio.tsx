@@ -5,9 +5,10 @@ import Link from "next/link";
 import {
   Film, Upload, CheckCircle2, Clock, AlertCircle, TrendingUp,
   BadgeCheck, ExternalLink, DollarSign, Store, Pencil, X, Check,
-  Sparkles, BarChart2, XCircle, Loader2, RefreshCw,
+  Sparkles, XCircle, Loader2, RefreshCw,
 } from "lucide-react";
 import { toast } from "@/utils/toast";
+import { FIELD_LIMITS } from "@/utils/limits";
 import WelcomePanel from "./WelcomePanel";
 
 interface Show {
@@ -119,7 +120,7 @@ export default function ArtistStudio({
                 <input
                   value={bioInput}
                   onChange={(e) => setBioInput(e.target.value)}
-                  maxLength={160}
+                  maxLength={FIELD_LIMITS.bio}
                   placeholder="One-line bio…"
                   aria-label="Bio"
                   title="Bio"
@@ -287,13 +288,6 @@ export default function ArtistStudio({
                       Re-upload
                     </Link>
                   )}
-                  <Link
-                    href={`/dashboard/artist/analytics?show=${show.id}`}
-                    className="p-1.5 rounded-lg text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                    title="View Analytics"
-                  >
-                    <BarChart2 className="w-4 h-4" />
-                  </Link>
                   {show.status === "draft" && (
                     <Link
                       href={`/dashboard/artist/upload?edit=${show.id}`}

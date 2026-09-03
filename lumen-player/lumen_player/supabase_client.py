@@ -31,6 +31,7 @@ class SupabaseClient:
                 headers=self._headers,
                 params={
                     "id": f"eq.{show_id}",
+                    "status": "eq.published",
                     "select": "id,title,mux_playback_id,video_metadata,status",
                 },
             )
@@ -44,12 +45,13 @@ class SupabaseClient:
     async def update_table_status(self, status: str) -> None:
         """Set this table's status (online_playing | online_idle | offline)."""
         try:
-            await self._client.patch(
+            resp = await self._client.patch(
                 f"{self._base}/rest/v1/tables",
                 headers={**self._headers, "Prefer": "return=minimal"},
                 params={"id": f"eq.{self._table_id}"},
                 json={"status": status},
             )
+            resp.raise_for_status()
             log.debug("table status -> %s", status)
         except Exception:
             log.exception("update_table_status failed")

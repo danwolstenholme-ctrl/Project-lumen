@@ -25,7 +25,6 @@ class LumenPlayerServer:
         self._port = port
         self._player = player
         self._supabase = supabase
-        self._current_show_id: str | None = None
 
     async def run(self) -> None:
         await self._supabase.update_table_status("online_idle")
@@ -71,7 +70,6 @@ class LumenPlayerServer:
                 await reply({"type": "status", "state": "playing"})
             elif ctype == "stop":
                 await self._player.stop_playback()
-                self._current_show_id = None
                 await self._supabase.update_table_status("online_idle")
                 await reply({"type": "status", "state": "idle"})
             elif ctype == "volume":
@@ -124,6 +122,5 @@ class LumenPlayerServer:
         if "brightness" in cmd:
             await self._player.set_brightness(float(cmd["brightness"]))
 
-        self._current_show_id = show_id
         await self._supabase.update_table_status("online_playing")
         await reply({"type": "status", "state": "playing", "show_id": show_id})

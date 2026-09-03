@@ -1,15 +1,9 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 import { createAdminClient } from "@/utils/supabase/admin";
 import TableManager from "./TableManager";
+import { requirePageRole } from "@/utils/auth";
 
 export default async function VenueTablesPage() {
-  const { userId } = await auth();
-  if (!userId) redirect("/sign-in");
-
-  const user = await currentUser();
-  const role = user?.publicMetadata?.role as string | undefined;
-  if (role && role !== "venue") redirect(`/dashboard/${role}`);
+  const { userId } = await requirePageRole("venue");
 
   const supabase = createAdminClient();
 

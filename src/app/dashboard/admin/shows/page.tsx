@@ -1,15 +1,9 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 import { createAdminClient } from "@/utils/supabase/admin";
 import AdminShows from "./AdminShows";
+import { requirePageRole } from "@/utils/auth";
 
 export default async function AdminShowsPage() {
-  const { userId } = await auth();
-  if (!userId) redirect("/sign-in");
-
-  const user = await currentUser();
-  const role = user?.publicMetadata?.role as string | undefined;
-  if (role && role !== "admin") redirect(`/dashboard/${role}`);
+  await requirePageRole("admin");
 
   const supabase = createAdminClient();
 

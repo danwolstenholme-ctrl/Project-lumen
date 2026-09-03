@@ -69,7 +69,6 @@ const SHOWS = [
 ];
 
 // ---- helpers --------------------------------------------------------------
-const now = () => new Date().toISOString();
 const monthsAgo = (n) => { const d = new Date(); d.setMonth(d.getMonth() - n); return d.toISOString(); };
 const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "artist";
 

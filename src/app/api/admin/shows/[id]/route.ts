@@ -1,17 +1,13 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/utils/supabase/admin";
+import { requireRole } from "@/utils/auth";
 
 interface RouteContext { params: Promise<{ id: string }> }
 
 export async function PATCH(req: Request, ctx: RouteContext) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const user = await currentUser();
-  if (user?.publicMetadata?.role !== "admin") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const guard = await requireRole("admin");
+  if (guard instanceof NextResponse) return guard;
+  const { userId } = guard;
 
   const { id } = await ctx.params;
   const { status, rejection_reason } = await req.json();

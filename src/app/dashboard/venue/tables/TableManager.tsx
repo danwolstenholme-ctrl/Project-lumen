@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Plus, Pencil, Trash2, Check, X, Wifi, Loader2, Monitor, AlertCircle, Copy } from "lucide-react";
 import { toast } from "@/utils/toast";
+import { FIELD_LIMITS } from "@/utils/limits";
 
 interface Table {
   id: string;
@@ -168,7 +169,7 @@ export default function TableManager({ venueName: initialVenueName, hasVenue, in
                   type="text"
                   value={venueNameInput}
                   onChange={(e) => setVenueNameInput(e.target.value)}
-                  maxLength={80}
+                  maxLength={FIELD_LIMITS.venueName}
                   placeholder="e.g. The Lumen Room"
                   aria-label="Venue name"
                   title="Venue name"
@@ -339,7 +340,7 @@ function EditRow({
           value={label}
           onChange={(e) => onLabelChange(e.target.value)}
           placeholder="Table label (e.g. Window 1)"
-          maxLength={40}
+          maxLength={FIELD_LIMITS.tableLabel}
           aria-label="Table label"
           title="Table label"
           className="px-3 py-2.5 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 text-base sm:text-sm font-manrope text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-fuchsia-500 transition-colors"

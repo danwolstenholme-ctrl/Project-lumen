@@ -1,14 +1,16 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/utils/supabase/admin";
+import { requireRole } from "@/utils/auth";
+import { FIELD_LIMITS } from "@/utils/limits";
 
 export async function PATCH(req: Request) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const guard = await requireRole("artist");
+  if (guard instanceof NextResponse) return guard;
+  const { userId } = guard;
 
   const { name, bio, contactEmail, slug, notifyOnLicense } = await req.json();
 
-  if (slug && !/^[a-z0-9-]+$/.test(slug)) {
+  if (slug && (!/^[a-z0-9-]+$/.test(slug) || slug.length > FIELD_LIMITS.slug)) {
     return NextResponse.json({ error: "Invalid slug" }, { status: 400 });
   }
 
@@ -28,8 +30,8 @@ export async function PATCH(req: Request) {
   const { error } = await supabase
     .from("users")
     .update({
-      name: name?.slice(0, 80),
-      bio: bio?.slice(0, 300),
+      name: name?.slice(0, FIELD_LIMITS.name),
+      bio: bio?.slice(0, FIELD_LIMITS.bio),
       contact_email: contactEmail,
       slug: slug || null,
       notify_on_license: notifyOnLicense,

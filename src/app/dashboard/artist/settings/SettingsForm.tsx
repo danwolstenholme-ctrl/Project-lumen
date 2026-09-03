@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { Check, Loader2, Upload, User, Link as LinkIcon, Bell, DollarSign } from "lucide-react";
 import Link from "next/link";
 import { toast } from "@/utils/toast";
+import { FIELD_LIMITS } from "@/utils/limits";
 
 interface Props {
   userId: string;
@@ -120,8 +121,8 @@ export default function SettingsForm({
         </div>
 
         <div className="grid grid-cols-1 gap-4 mt-5">
-          <Field label="Display Name" value={name} onChange={setName} maxLength={80} />
-          <Field label="Bio" value={bio} onChange={setBio} maxLength={300} multiline
+          <Field label="Display Name" value={name} onChange={setName} maxLength={FIELD_LIMITS.name} />
+          <Field label="Bio" value={bio} onChange={setBio} maxLength={FIELD_LIMITS.bio} multiline
             hint={`${bio.length}/300`} />
           <Field label="Contact Email" value={contactEmail} onChange={setContactEmail} type="email"
             hint="Shown on your public profile" />

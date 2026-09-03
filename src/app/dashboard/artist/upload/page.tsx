@@ -1,14 +1,8 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 import UploadStudio from "./UploadStudio";
+import { requirePageRole } from "@/utils/auth";
 
 export default async function UploadPage() {
-  const { userId } = await auth();
-  if (!userId) redirect("/sign-in");
-
-  const user = await currentUser();
-  const role = user?.publicMetadata?.role as string | undefined;
-  if (role && role !== "artist") redirect(`/dashboard/${role}`);
+  const { userId } = await requirePageRole("artist");
 
   return <UploadStudio userId={userId} />;
 }

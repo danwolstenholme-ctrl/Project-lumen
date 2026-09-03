@@ -1,13 +1,14 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { getMux } from "@/utils/mux";
+import { requireRole } from "@/utils/auth";
 
 const BUCKET = "shows";
 
 export async function POST(req: Request) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const guard = await requireRole("artist");
+  if (guard instanceof NextResponse) return guard;
+  const { userId } = guard;
 
   const { showId, fileKey, extension } = await req.json();
   if (!showId || !fileKey) {

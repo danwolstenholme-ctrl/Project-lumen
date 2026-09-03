@@ -1,12 +1,14 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { getMux } from "@/utils/mux";
 import { applyAssetReady, applyAssetErrored, type MuxAsset } from "@/utils/muxValidation";
+import { requireRole } from "@/utils/auth";
+import { FIELD_LIMITS } from "@/utils/limits";
 
 export async function POST(req: Request) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const guard = await requireRole("artist");
+  if (guard instanceof NextResponse) return guard;
+  const { userId } = guard;
 
   const body = await req.json();
   const { showId, title, description, category, tags, thumbnailUrl, muxUploadId } = body;
@@ -20,8 +22,8 @@ export async function POST(req: Request) {
   const { error } = await supabase.from("shows").insert({
     id: showId,
     artist_id: userId,
-    title,
-    description: description ?? null,
+    title: String(title).slice(0, FIELD_LIMITS.showTitle),
+    description: description ? String(description).slice(0, FIELD_LIMITS.showDescription) : null,
     category: category ?? null,
     tags: tags ?? [],
     thumbnail_url: thumbnailUrl ?? null,
