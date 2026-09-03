@@ -2,7 +2,7 @@
 
 On-table software for Project Lumen. Runs on a Raspberry Pi 5 attached to a 4K projector (or monitor during prototyping), receives control commands from the Lumen dashboard via a Supabase Realtime channel (outbound WSS only — works over the open internet), and plays HLS video full-screen via mpv.
 
-See [`LUMEN_HARDWARE_SPEC.md`](../LUMEN_HARDWARE_SPEC.md) in the parent repo for the hardware BOM and the full command protocol.
+See the [repo README](../README.md) for the platform architecture and how the dashboard drives these commands. The full command protocol is documented below.
 
 ## Architecture
 
@@ -166,7 +166,7 @@ For frame-exact sync (only needed if Lumen ever does coordinated explosive visua
 
 ## Status
 
-`v0.1.0` — MVP. Not yet tested on real Pi hardware (built in advance of hardware delivery, see Stage 1 of the [hardware spec](../LUMEN_HARDWARE_SPEC.md#stage-1--software-pipeline-validation)). First end-to-end test will validate the design.
+`v0.1.0` — MVP. Not yet tested on real Pi hardware: it was built in advance of hardware delivery, so treat the first end-to-end run as design validation.
 
 ## License
 

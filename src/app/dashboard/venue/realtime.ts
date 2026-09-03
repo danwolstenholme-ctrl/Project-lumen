@@ -5,7 +5,7 @@ import type { RealtimeChannel, SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * Command payload sent to a table's Lumen Player.
- * Canonical shape — see LUMEN_HARDWARE_SPEC.md §5.3.
+ * Canonical shape — see "Player command protocol" in the repo README.
  */
 export interface TableCommand {
   action: "play" | "pause" | "resume" | "stop" | "volume" | "brightness" | "ping";
